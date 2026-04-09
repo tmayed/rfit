@@ -1,0 +1,7 @@
+Package: rfit
+Type: Project
+Title: rfit distributions
+Version: 0.1.0
+Depends:
+    R (>= 3.6.0)
+Encoding: UTF-8

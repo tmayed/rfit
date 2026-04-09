@@ -1,0 +1,8 @@
+services:
+  rfit:
+    build:
+      context: ${REPO}
+      dockerfile: Dockerfile
+    restart: no
+    image: ${IMAGE_NAME}
+    container_name: ${CONTAINER_NAME}
