@@ -1,15 +1,62 @@
-# rfit 
+# rfit Package
 
-rift is a package to perform probabilty distribution fitting on data.
+## Overview
 
-It will fit data based on loglikley hood
+rfit is an R package for probability distribution fitting using maximum likelihood estimation (MLE).
 
-there will be a seperate fit function for truncated data
+## Architecture
 
-the package will allow for fitting any weighted mixture of distributions
+- Each distribution is stored in a separate file under `app/dist/`
+- All functions for a distribution reside in its dedicated file
+- The package runs in a Docker container for reproducible execution
 
-every distribution will be store in a seperate file in the app/dist folder and all functions accociated with a distribution will be in that file
+## Current Distributions
 
-to start the package should have a lognormal distribution and pareto distribution
+- Lognormal (`app/dist/lognormal.R`)
+- Pareto (`app/dist/pareto.R`)
 
-The package will run in it's own docker container where to user can shell command into the container to run comannds.
+## Function Naming Convention
+
+Each distribution implements the following functions using the pattern `{dist}_{suffix}`:
+
+| Function | Description |
+|----------|-------------|
+| `{dist}_log_likelihood` | Compute log-likelihood for given parameters |
+| `{dist}_fit` | Fit distribution using MLE |
+| `{dist}_fit_truncated` | Fit truncated distribution using MLE |
+| `{dist}_pdf` | Probability density function |
+| `{dist}_cdf` | Cumulative distribution function |
+| `{dist}_quantile` | Quantile function |
+| `{dist}_rand` | Generate random samples |
+| `{dist}_mean` | Compute mean |
+| `{dist}_std` | Compute standard deviation |
+
+## File Structure
+
+```
+app/
+├── dist/
+│   ├── lognormal.R
+│   └── pareto.R
+├── rfit.R
+└── Dockerfile
+tests/
+└── test.R
+poc/
+└── poc.R
+```
+
+## Usage
+
+Shell into the Docker container and load the modules:
+
+```r
+source("app/dist/lognormal.R")
+source("app/dist/pareto.R")
+
+# Fit a distribution
+fit <- lognormal_fit(data)
+
+# Evaluate PDF
+densities <- lognormal_pdf(x, fit)
+```
