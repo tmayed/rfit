@@ -1,3 +1,7 @@
+/pkg/renv
+/pkg/.Rprofile
+/pkg/renv.lock
+
 # History files
 .Rhistory
 .Rapp.history
