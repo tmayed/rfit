@@ -15,12 +15,12 @@ if (!interactive()) {
 }
 
 # 1. Load data
-data_path <- "inputs/danish.csv"
+input_file <- "inputs/whole_dataset.csv"
 if (!file.exists(data_path)) {
   stop(sprintf("Data file not found: %s", data_path))
 }
 
-danish_data <- read.csv(data_path)$dat
+danish_data <- read.csv(data_path)$traffic
 danish_data <- danish_data[!is.na(danish_data) & danish_data > 0]
 
 cat(sprintf("Loaded %d observations from %s\n", length(danish_data), data_path))

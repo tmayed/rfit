@@ -15,12 +15,12 @@ if (!interactive()) {
 }
 
 # 1. Load data
-input_file <- "inputs/danish.csv"
+input_file <- "inputs/whole_dataset.csv"
 if (!file.exists(input_file)) {
   stop(sprintf("Input file not found: %s", input_file))
 }
 
-data_raw <- read.csv(input_file)$dat
+data_raw <- read.csv(input_file)$traffic
 data_clean <- data_raw[!is.na(data_raw) & data_raw > 0]
 
 # 2. Take a subset of around 2000 data points

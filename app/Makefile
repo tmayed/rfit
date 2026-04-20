@@ -26,6 +26,9 @@ danish_2m:
 2m_best_fit:
 	(cd poc && Rscript 2m_best_fit.R)
 
+fit_2m:
+	(cd poc && Rscript fit_2m.R)
+
 danish_3m:
 	(cd poc && Rscript danish_fit_3m.R)
 

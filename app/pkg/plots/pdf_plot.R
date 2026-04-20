@@ -1,28 +1,23 @@
-# Plotting utilities for distribution fitting
+# Plotting utilities for distribution fitting (PDF)
 
-#' Plot CDF comparison between sample data and fitted distribution
+#' Plot PDF comparison between sample data and fitted distribution
 #' @param sample_data Numeric vector of observed sample data
-#' @param fitted_cdf Function that takes quantiles and returns CDF values
-#'                     (e.g., a function closure with fitted parameters)
+#' @param fit Fitted distribution object
+#' @param dist_pdf Function that takes x and fit, and returns PDF values
 #' @param output_dir Character string path for output directory
 #' @param output_file Character string path for output file (without .png extension)
-#' @param title Plot title (default: "Empirical vs Fitted CDF")
+#' @param title Plot title (default: "Empirical vs Fitted PDF")
 #' @param x_label X-axis label (default: "Value")
-#' @param y_label Y-axis label (default: "Cumulative Probability")
+#' @param y_label Y-axis label (default: "Density")
+#' @param empirical_mean Optional pre-calculated empirical mean
+#' @param fitted_mean Optional pre-calculated fitted mean
 #' @return ggplot2 plot object
-#' @examples
-#' # Example usage:
-#' data <- c(1, 2, 3, 4, 5)
-#' fit <- lognormal_fit(data)
-#' cdf_func <- function(q) plnorm(q, meanlog = fit$mu, sdlog = fit$sigma)
-#' plot_cdf_comparison(sample_data = data, fitted_cdf = cdf_func,
-#'                     output_dir = "poc/outputs", output_file = "lognormal_cdf")
 #' @export
-plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
+plot_pdf_comparison <- function(sample_data, fit, dist_pdf,
                                 output_dir, output_file,
-                                title = "Empirical vs Fitted CDF",
+                                title = "Empirical vs Fitted PDF",
                                 x_label = "Value",
-                                y_label = "Cumulative Probability",
+                                y_label = "Density",
                                 empirical_mean = NULL,
                                 fitted_mean = NULL) {
 
@@ -35,29 +30,20 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
   # Build full output path
   output_file_full <- file.path(output_dir, paste0(output_file, ".png"))
 
-  # Create empirical CDF data
-  n <- length(sample_data)
-  sorted_data <- sort(sample_data)
-  empirical_probs <- seq_len(n) / n
-
-  empirical_df <- data.frame(
-    x = sorted_data,
-    y = empirical_probs,
-    type = "Empirical"
-  )
-
-  # Create fitted CDF data
+  # Range for plotting
   x_range <- range(sample_data)
   # Increase resolution for better curves
   x_points <- seq(x_range[1], x_range[2], length.out = 1000)
-  fitted_probs <- dist_cdf(x=x_points, fit=fit)
-
+  
+  # Calculate fitted PDF
+  fitted_dens <- dist_pdf(x=x_points, fit=fit)
+  
   fitted_df <- data.frame(
     x = x_points,
-    y = fitted_probs,
+    y = fitted_dens,
     type = "Fitted"
   )
-  # Filter out non-finite values (should be fewer now)
+  # Filter out non-finite values
   fitted_df <- fitted_df[is.finite(fitted_df$x) & is.finite(fitted_df$y), ]
 
   # Calculate means if not provided
@@ -73,9 +59,8 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
     if (!is.null(dist_name)) {
       mean_func_name <- paste0(dist_name, "_mean")
       
-      # Try direct lookup first (most common)
+      # Try direct lookup first
       dist_mean <- tryCatch({
-        # Check if function exists anywhere in search path
         if (dist_name == "mixture") {
           mixture_mean(fit)
         } else {
@@ -83,12 +68,11 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
           func(fit)
         }
       }, error = function(e) {
-        # Fallback to checking if it's in the global env explicitly
         tryCatch({
           func <- get(mean_func_name, envir = .GlobalEnv)
           func(fit)
         }, error = function(e2) {
-          NA # Give up
+          NA
         })
       })
     }
@@ -108,16 +92,11 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
   library(tidyr)
   library(ggplot2)
 
-  # Combine data for plotting
-  plot_data <- bind_rows(
-    empirical_df,
-    fitted_df
-  )
-
   # Create plot
-  p <- ggplot(plot_data, aes(x = x, y = y, color = type)) +
-    geom_step(data = empirical_df, linewidth = 1) +
-    geom_line(data = fitted_df, linewidth = 1) +
+  # We use geom_density for empirical and geom_line for fitted
+  p <- ggplot() +
+    geom_density(data = data.frame(x = sample_data), aes(x = x, color = "Empirical"), linewidth = 1) +
+    geom_line(data = fitted_df, aes(x = x, y = y, color = "Fitted"), linewidth = 1) +
     geom_vline(data = means_df, aes(xintercept = xintercept, color = type), 
                linetype = "dashed", linewidth = 0.8) +
     labs(

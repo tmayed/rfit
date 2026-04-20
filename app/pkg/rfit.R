@@ -32,6 +32,8 @@ if (base_dir == ".") {
   source("fit_2m.R")
   source("fit_3m.R")
   source("mixture.R")
+  source("plots/cdf_plot.R")
+  source("plots/pdf_plot.R")
 } else {
   source(file.path(base_dir, "dist/lognormal.R"))
   source(file.path(base_dir, "dist/normal.R"))
@@ -49,7 +51,15 @@ if (base_dir == ".") {
   source(file.path(base_dir, "fit_2m.R"))
   source(file.path(base_dir, "fit_3m.R"))
   source(file.path(base_dir, "mixture.R"))
+  source(file.path(base_dir, "plots/cdf_plot.R"))
+  source(file.path(base_dir, "plots/pdf_plot.R"))
 }
+
+# Plotting Exports
+#' @export
+plot_cdf_comparison <- plot_cdf_comparison
+#' @export
+plot_pdf_comparison <- plot_pdf_comparison
 
 # Orchestrator Exports
 #' @export
