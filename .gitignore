@@ -1,11 +1,8 @@
-/pkg/renv
-/pkg/.Rprofile
-/pkg/renv.lock
-/pkg/.dev-ssh
-/pkg/.ssh
-/.dev-ssh
-.ssh/
+renv/
+.Rprofile
+renv.lock
 .dev-ssh/
+.ssh/
 
 # History files
 .Rhistory

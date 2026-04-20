@@ -1,0 +1,17 @@
+services:
+  rfit:
+    build:
+      context: ${INFRA}
+      dockerfile: Dockerfile
+    restart: no
+    image: rfit
+    container_name: rfit
+    volumes:
+      - ${APP}:/workspace
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    external: true
+    name: subspace
