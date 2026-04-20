@@ -3,6 +3,10 @@ renv/
 renv.lock
 .dev-ssh/
 .ssh/
+app/poc/inputs/*
+!app/poc/inputs/.gitkeep
+app/poc/outputs/*
+!app/poc/outputs/.gitkeep
 
 # History files
 .Rhistory
