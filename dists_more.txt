@@ -1,0 +1,243 @@
+Normal (Gaussian)
+Uniform (continuous)
+Exponential
+Gamma
+Beta
+Chi-square
+Student’s t
+F-distribution
+Log-normal
+Weibull
+Erlang
+Cauchy
+Laplace
+Rayleigh
+Maxwell–Boltzmann
+Pareto
+Lomax
+Generalized Pareto
+Gumbel
+Fréchet
+Weibull minimum
+Weibull maximum
+Generalized extreme value
+Logistic
+Generalized logistic
+Skew-normal
+Skew-t
+Johnson SU
+Johnson SB
+Johnson SL
+Kumaraswamy
+Triangular
+Trapezoidal
+Reciprocal
+Inverse Gaussian
+Generalized inverse Gaussian
+Normal-inverse Gaussian
+Hyperbolic
+Generalized hyperbolic
+Variance-gamma
+Generalized gamma
+Amoroso
+Nakagami
+Rice
+Folded normal
+Half-normal
+Half-Cauchy
+Half-t
+Wrapped normal
+Wrapped Cauchy
+Von Mises
+Von Mises–Fisher
+Arcsine
+Wigner semicircle
+Marchenko–Pastur
+Kolmogorov
+Kolmogorov–Smirnov
+Irwin–Hall
+Bates
+Log-logistic
+Dagum
+Burr Type III
+Burr Type IV
+Burr Type V
+Burr Type VI
+Burr Type VII
+Burr Type VIII
+Burr Type IX
+Burr Type X
+Burr Type XI
+Burr Type XII
+Singh–Maddala
+Benini
+Benktander Type I
+Benktander Type II
+Champernowne
+Fisk
+Generalized beta of the first kind
+Generalized beta of the second kind
+Beta prime
+Pearson Type I
+Pearson Type II
+Pearson Type III
+Pearson Type IV
+Pearson Type V
+Pearson Type VI
+Pearson Type VII
+Pearson Type VIII
+Pearson Type IX
+Pearson Type X
+Pearson Type XI
+Pearson Type XII
+K-distribution
+Generalized normal Type I
+Generalized normal Type II
+Generalized normal Type III
+Exponential power
+Power function
+Gompertz
+Makeham
+Shifted Gompertz
+Generalized exponential
+Exponentiated exponential
+Exponentiated Weibull
+Exponentiated gamma
+Exponentiated Pareto
+Q-exponential
+Kappa
+Log-Cauchy
+Log-gamma
+Log-Laplace
+Inverse gamma
+Scaled inverse chi-square
+Generalized chi-square
+Noncentral chi-square
+Noncentral t
+Noncentral F
+Noncentral beta
+Doubly noncentral beta
+Doubly noncentral F
+Hotelling’s T-squared
+Z distribution
+Probit distribution
+Logit-normal
+Skew-logistic
+Generalized Laplace
+Asymmetric Laplace
+Hyper-exponential
+Hypoexponential
+Coxian distribution
+Phase-type
+Matrix-exponential distribution
+Stable distribution
+Alpha-stable distribution
+Lévy
+Lévy skew alpha-stable
+Holtsmark
+Slash
+Contaminated normal
+Gaussian mixture
+Finite mixture distribution
+Infinite mixture distribution
+Truncated normal
+Truncated exponential
+Truncated gamma
+Truncated Weibull
+Truncated Pareto
+Reflected gamma
+Reflected Weibull
+Generalized uniform
+Piecewise uniform
+Spline distribution
+Log-skew-normal
+Log-skew-t
+Generalized log-logistic
+Exponentiated log-logistic
+Generalized Weibull
+Modified Weibull
+Extended Weibull
+Additive Weibull
+Beta Weibull
+Gamma Weibull
+Kumaraswamy Weibull
+Marshall–Olkin Weibull
+Marshall–Olkin exponential
+Marshall–Olkin gamma
+Marshall–Olkin Lomax
+Marshall–Olkin extended exponential
+Marshall–Olkin extended Weibull
+Generalized Gompertz
+Exponentiated Gompertz
+Beta Gompertz
+Kumaraswamy Gompertz
+Generalized Rayleigh
+Exponentiated Rayleigh
+Beta Rayleigh
+Generalized inverse Weibull
+Inverse Weibull
+Exponentiated inverse Weibull
+Generalized inverse exponential
+Inverse exponential
+Exponentiated inverse exponential
+Birnbaum–Saunders
+Generalized Birnbaum–Saunders
+Fatigue life distribution
+Generalized fatigue life
+Log-Birnbaum–Saunders
+Topp–Leone distribution
+Generalized Topp–Leone
+Exponentiated Topp–Leone
+Kumaraswamy Topp–Leone
+Transmuted distribution
+Transmuted Weibull
+Transmuted exponential
+Transmuted gamma
+Transmuted log-logistic
+Odd Weibull
+Odd log-logistic
+Odd generalized exponential
+Odd Burr
+Exponentiated generalized distribution
+Alpha power exponential
+Alpha power Weibull
+Alpha power Pareto
+Beta generalized exponential
+Beta generalized Weibull
+Beta generalized gamma
+Beta Pareto
+Beta normal
+Beta exponential
+Kumaraswamy generalized exponential
+Kumaraswamy generalized gamma
+Kumaraswamy Pareto
+Kumaraswamy exponential
+Kumaraswamy normal
+Exponentiated generalized Pareto
+Generalized Pareto Type II
+Generalized Pareto Type III
+Extended Pareto
+Truncated generalized Pareto
+Double Pareto
+Double Pareto lognormal
+Log-double Pareto
+Generalized lognormal
+Power generalized Weibull
+Flexible Weibull
+Flexible exponential
+Flexible gamma
+Exponentiated flexible Weibull
+Exponentiated flexible exponential
+Exponentiated flexible gamma
+Sine-skewed distributions
+Cosine distributions
+Generalized cosine distribution
+Cardioid distribution
+Generalized arcsine
+Generalized semicircle
+Power semicircle
+Generalized Wigner distribution
+Quantum harmonic oscillator distribution
+Bose–Einstein distribution (continuous approximation)
+Fermi–Dirac distribution (continuous approximation)
+Bradford

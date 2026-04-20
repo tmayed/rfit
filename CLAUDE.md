@@ -6,7 +6,7 @@ rfit is an R package for probability distribution fitting using maximum likeliho
 
 ## Architecture
 
-- Each distribution is stored in a separate file under `app/dist/`
+- Each distribution is stored in a separate file under `pkg/dist/`
 - All functions for a distribution reside in its dedicated file
 - The package runs in a Docker container for reproducible execution
 
@@ -31,32 +31,13 @@ Each distribution implements the following functions using the pattern `{dist}_{
 | `{dist}_mean` | Compute mean |
 | `{dist}_std` | Compute standard deviation |
 
+
 ## File Structure
 
 ```
 app/
 ├── dist/
-│   ├── lognormal.R
-│   └── pareto.R
-├── rfit.R
-└── Dockerfile
 tests/
-└── test.R
+├── dist/
 poc/
-└── poc.R
-```
-
-## Usage
-
-Shell into the Docker container and load the modules:
-
-```r
-source("app/dist/lognormal.R")
-source("app/dist/pareto.R")
-
-# Fit a distribution
-fit <- lognormal_fit(data)
-
-# Evaluate PDF
-densities <- lognormal_pdf(x, fit)
 ```

@@ -7,4 +7,11 @@ services:
     image: rfit
     container_name: rfit
     volumes:
-      - ./pkg:/workspace
+      - ./:/workspace
+    networks:
+      - shared-net
+
+networks:
+  shared-net:
+    external: true
+    name: subspace

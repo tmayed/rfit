@@ -4,4 +4,8 @@ Title: rfit distributions
 Version: 0.1.0
 Depends:
     R (>= 3.6.0)
+Imports:
+    ggplot2,
+    dplyr,
+    tidyr
 Encoding: UTF-8

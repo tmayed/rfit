@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export REPO="/home/tom/GitHub/rfit"
+export REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 export CONTAINER_NAME="rfit"
 export IMAGE_NAME="rfit"
 SERVICE_NAME="rfit"

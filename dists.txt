@@ -1,0 +1,135 @@
+Normal (Gaussian)
+Uniform (continuous)
+Exponential
+Gamma
+Beta
+Chi-square
+Student’s t
+F-distribution
+Log-normal
+Weibull
+Erlang
+Cauchy
+Laplace (double exponential)
+Rayleigh
+Maxwell–Boltzmann
+Pareto
+Lomax
+Generalized Pareto
+Gumbel
+Fréchet
+Weibull (extreme value form)
+Generalized extreme value
+Logistic
+Generalized logistic
+Skew-normal
+Skew-t
+Johnson SU
+Johnson SB
+Johnson SL
+Kumaraswamy
+Triangular
+Trapezoidal
+Reciprocal (log-uniform)
+Inverse Gaussian
+Generalized inverse Gaussian
+Normal-inverse Gaussian
+Hyperbolic distribution
+Generalized hyperbolic
+Variance-gamma
+Generalized gamma
+Amoroso
+Nakagami
+Rice (Rician)
+Folded normal
+Half-normal
+Half-Cauchy
+Half-t
+Wrapped normal
+Wrapped Cauchy
+Von Mises
+Von Mises–Fisher
+Arcsine
+Wigner semicircle
+Marchenko–Pastur
+Kolmogorov
+Kolmogorov–Smirnov
+Irwin–Hall
+Bates
+Log-logistic
+Dagum
+Burr Type III
+Burr Type XII
+Singh–Maddala
+Benini
+Benktander Type I
+Benktander Type II
+Champernowne
+Fisk
+Generalized beta of the first kind
+Generalized beta of the second kind
+Beta prime
+Pearson Type I
+Pearson Type II
+Pearson Type III
+Pearson Type IV
+Pearson Type V
+Pearson Type VI
+Pearson Type VII
+Pearson Type VIII
+Pearson Type IX
+Pearson Type X
+Pearson Type XI
+Pearson Type XII
+K-distribution
+Generalized normal Type I
+Generalized normal Type II
+Exponential power
+Power function
+Gompertz
+Makeham
+Shifted Gompertz
+Generalized exponential
+Exponentiated exponential
+Exponentiated Weibull
+Exponentiated gamma
+Q-exponential
+Kappa distribution
+Log-Cauchy
+Log-gamma
+Log-Laplace
+Inverse gamma
+Scaled inverse chi-square
+Generalized chi-square
+Noncentral chi-square
+Noncentral t
+Noncentral F
+Noncentral beta
+Doubly noncentral beta
+Doubly noncentral F
+Hotelling’s T-squared
+Z distribution
+Probit distribution
+Logit-normal
+Skew-logistic
+Generalized Laplace
+Asymmetric Laplace
+Hyper-exponential
+Hypoexponential
+Phase-type
+Stable distribution
+Lévy
+Holtsmark
+Slash
+Contaminated normal
+Gaussian mixture
+Truncated normal
+Truncated exponential
+Truncated gamma
+Truncated Weibull
+Reflected gamma
+Generalized uniform
+Piecewise uniform
+Spline distribution
+Bradford
+DPLN
