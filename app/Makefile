@@ -29,6 +29,9 @@ danish_2m:
 fit_2m:
 	(cd poc && Rscript fit_2m.R)
 
+fit_2m_mean:
+	(cd poc && Rscript fit_2m_mean.R)
+
 danish_3m:
 	(cd poc && Rscript danish_fit_3m.R)
 

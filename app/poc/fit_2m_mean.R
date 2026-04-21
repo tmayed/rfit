@@ -26,14 +26,20 @@ empirical_mean <- mean(data)
 cat(sprintf("Loaded %d data points.\n", length(data)))
 cat(sprintf("Empirical Mean: %.4f\n", empirical_mean))
 
-# 2. Define mixture components
+# 2. Take sample
+set.seed(42)
+subset_size <- min(10000, length(data))
+data <- sample(data, subset_size)
+cat(sprintf("Sample %d data points.\n", length(data)))
+
+# 3. Define mixture components
 dist_names <- c("lognormal", "dpln")
 cat(sprintf("\nFitting mixture WITH MEAN CONSTRAINT: %s + %s\n", dist_names[1], dist_names[2]))
 
-# 3. Fit the mixture with mean constraint
+# 4. Fit the mixture with mean constraint
 fit <- mixture_fit_mean(data, dist_names)
 
-# 4. Output results
+# 5. Output results
 cat("\n=== Fit Results (Constrained) ===\n")
 cat(sprintf("Log-Likelihood (penalized): %.4f\n", fit$log_likelihood))
 
@@ -55,7 +61,7 @@ cat(sprintf("Mixture Theoretical Mean: %.4f\n", mixture_theoretical_mean))
 cat(sprintf("Empirical Mean:          %.4f\n", empirical_mean))
 cat(sprintf("Difference:              %.4e\n", mixture_theoretical_mean - empirical_mean))
 
-# 5. Plots
+# 6. Plots
 output_dir <- "outputs"
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
