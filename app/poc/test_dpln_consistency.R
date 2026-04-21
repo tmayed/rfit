@@ -1,5 +1,5 @@
 # Test dPLN consistency
-source("pkg/dist/dpln.R")
+source("pkg/dist/dpln_4p.R")
 
 set.seed(42)
 true_alpha <- 3.0

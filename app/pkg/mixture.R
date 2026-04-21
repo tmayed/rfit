@@ -3,68 +3,16 @@
 # -------------------------------
 # Parameter Definitions
 # -------------------------------
-.dist_params <- list(
-  lognormal = list(
-    names = c("mu", "sigma"),
-    to_internal = function(p) c(p$mu, log(p$sigma)),
-    from_internal = function(v) list(mu = v[1], sigma = exp(v[2]))
-  ),
-  normal = list(
-    names = c("mean", "sd"),
-    to_internal = function(p) c(p$mean, log(p$sd)),
-    from_internal = function(v) list(mean = v[1], sd = exp(v[2]))
-  ),
-  weibull = list(
-    names = c("shape", "scale"),
-    to_internal = function(p) c(log(p$shape), log(p$scale)),
-    from_internal = function(v) list(shape = exp(v[1]), scale = exp(v[2]))
-  ),
-  pareto = list(
-    names = c("shape", "scale"),
-    to_internal = function(p) c(log(p$shape), log(p$scale)),
-    from_internal = function(v) list(shape = exp(v[1]), scale = exp(v[2]))
-  ),
-  dpln = list(
-    names = c("alpha", "beta", "nu", "tau"),
-    to_internal = function(p) c(log(p$alpha), log(p$beta), p$nu, log(p$tau)),
-    from_internal = function(v) list(alpha = exp(v[1]), beta = exp(v[2]), nu = v[3], tau = exp(v[4]))
-  ),
-  gb2 = list(
-    names = c("a", "b", "p", "q"),
-    to_internal = function(p) c(log(p$a), log(p$b), log(p$p), log(p$q)),
-    from_internal = function(v) list(a = exp(v[1]), b = exp(v[2]), p = exp(v[3]), q = exp(v[4]))
-  ),
-  kappa4 = list(
-    names = c("xi", "alpha", "k", "h"),
-    to_internal = function(p) c(p$xi, log(p$alpha), p$k, log(p$h)),
-    from_internal = function(v) list(xi = v[1], alpha = exp(v[2]), k = v[3], h = exp(v[4]))
-  ),
-  bradford = list(
-    names = c("shape", "lower", "upper"),
-    to_internal = function(p) c(log(p$shape), p$lower, p$upper),
-    from_internal = function(v) list(shape = exp(v[1]), lower = v[2], upper = v[3])
-  ),
-  fisk = list(
-    names = c("scale", "shape"),
-    to_internal = function(p) c(log(p$scale), log(p$shape)),
-    from_internal = function(v) list(scale = exp(v[1]), shape = exp(v[2]))
-  ),
-  johnsonsb = list(
-    names = c("gamma", "delta", "xi", "lambda"),
-    to_internal = function(p) c(p$gamma, log(p$delta), p$xi, log(p$lambda)),
-    from_internal = function(v) list(gamma = v[1], delta = exp(v[2]), xi = v[3], lambda = exp(v[4]))
-  ),
-  johnsonsl = list(
-    names = c("gamma", "delta", "xi"),
-    to_internal = function(p) c(p$gamma, log(p$delta), p$xi),
-    from_internal = function(v) list(gamma = v[1], delta = exp(v[2]), xi = v[3])
-  ),
-  johnsonsu = list(
-    names = c("gamma", "delta", "xi", "lambda"),
-    to_internal = function(p) c(p$gamma, log(p$delta), p$xi, log(p$lambda)),
-    from_internal = function(v) list(gamma = v[1], delta = exp(v[2]), xi = v[3], lambda = exp(v[4]))
-  )
-)
+# Sourced from definitions.R
+if (!exists(".dist_params")) {
+  current_file <- tryCatch(normalizePath(sys.frame(1)$ofile), error = function(e) ".")
+  base_dir <- dirname(current_file)
+  if (base_dir == "." || is.na(base_dir)) {
+    source("definitions.R")
+  } else {
+    source(file.path(base_dir, "definitions.R"))
+  }
+}
 
 # -------------------------------
 # Mixture Fit
@@ -188,6 +136,47 @@ mixture_mean <- function(fit) {
     mean_func <- get(paste0(fit$dist_names[i], "_mean"))
     m <- mean_func(fit$components[[i]])
     if (is.finite(m)) out <- out + fit$weights[i] * m
+  }
+  out
+}
+
+mixture_quantile <- function(p, fit) {
+  # Numerical root finding for mixture quantile
+  out <- numeric(length(p))
+  for (i in seq_along(p)) {
+    if (p[i] <= 0) {
+      out[i] <- 0
+      next
+    }
+    if (p[i] >= 1) {
+      out[i] <- Inf # Or some large value if bounded
+      next
+    }
+    
+    target <- p[i]
+    f <- function(x) mixture_cdf(x, fit) - target
+    
+    # Heuristic for bounds: use min/max of components' quantiles
+    low <- 0
+    high <- 1e6 # Default large
+    
+    # Try to find better bounds
+    try({
+      comp_qs <- sapply(seq_along(fit$components), function(j) {
+        q_func <- get(paste0(fit$dist_names[j], "_quantile"))
+        q_func(p[i], fit$components[[j]])
+      })
+      low <- min(comp_qs) * 0.1
+      high <- max(comp_qs) * 10
+    }, silent = TRUE)
+    
+    # Expand high bound if needed
+    while(f(high) < 0 && high < 1e12) high <- high * 10
+    
+    res <- tryCatch({
+      uniroot(f, lower = low, upper = high, extendInt = "yes")$root
+    }, error = function(e) NA)
+    out[i] <- res
   }
   out
 }

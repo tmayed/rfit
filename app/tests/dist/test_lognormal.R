@@ -1,6 +1,6 @@
 # Test suite for Lognormal Distribution
 
-source("../../pkg/dist/lognormal.R")
+source("../../pkg/dist/lognormal_2p.R")
 
 # Set seed for reproducibility
 set.seed(42)

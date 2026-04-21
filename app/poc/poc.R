@@ -1,7 +1,7 @@
 # Proof of concept: fit lognormal and pareto to lognormal data
 
-source("pkg/dist/lognormal.R")
-source("pkg/dist/pareto.R")
+source("pkg/dist/lognormal_2p.R")
+source("pkg/dist/pareto_2p.R")
 source("pkg/plots/cdf_plot.R")
 
 # Prevent Rplots.pdf from being created

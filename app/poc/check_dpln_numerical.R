@@ -1,5 +1,5 @@
 # Numerical check for dPLN
-source("pkg/dist/dpln.R")
+source("pkg/dist/dpln_4p.R")
 
 fit <- list(alpha = 1.4757, beta = 12.2656, nu = 0.6020, tau = 0.0003)
 

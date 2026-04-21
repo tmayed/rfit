@@ -78,84 +78,73 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
     fitted_df <- fitted_df[fitted_df$y > 0, ] # Avoid log(0)
   }
 
-  # Calculate means if not provided
-  if (is.null(empirical_mean)) {
-    empirical_mean <- mean(sample_data)
+  # Prepare data for vertical lines (means)
+  means_df <- data.frame(xintercept = numeric(0), type = character(0))
+  
+  if (!is.null(empirical_mean)) {
+    means_df <- rbind(means_df, data.frame(
+      xintercept = empirical_mean,
+      type = "Empirical Mean"
+    ))
   }
   
-  if (is.null(fitted_mean)) {
-    # Distribution mean using naming convention
-    dist_name <- fit$distribution
-    dist_mean <- NA
-    
-    if (!is.null(dist_name)) {
-      mean_func_name <- paste0(dist_name, "_mean")
-      
-      # Try direct lookup first (most common)
-      dist_mean <- tryCatch({
-        # Check if function exists anywhere in search path
-        if (dist_name == "mixture") {
-          mixture_mean(fit)
-        } else {
-          func <- get(mean_func_name)
-          func(fit)
-        }
-      }, error = function(e) {
-        # Fallback to checking if it's in the global env explicitly
-        tryCatch({
-          func <- get(mean_func_name, envir = .GlobalEnv)
-          func(fit)
-        }, error = function(e2) {
-          NA # Give up
-        })
-      })
-    }
-    fitted_mean <- dist_mean
+  if (!is.null(fitted_mean)) {
+    means_df <- rbind(means_df, data.frame(
+      xintercept = fitted_mean,
+      type = "Fitted Mean"
+    ))
   }
   
-  # Create a data frame for vertical lines
-  means_df <- data.frame(
-    xintercept = c(empirical_mean, fitted_mean),
-    type = c("Empirical Mean", "Fitted Mean")
-  )
   # Filter out non-finite means
-  means_df <- means_df[is.finite(means_df$xintercept), ]
+  if (nrow(means_df) > 0) {
+    means_df <- means_df[is.finite(means_df$xintercept), ]
+  }
 
   # Now load libraries for plotting
   library(dplyr)
   library(tidyr)
   library(ggplot2)
 
-  # Combine data for plotting
-  plot_data <- bind_rows(
-    empirical_df,
-    fitted_df
+  # Define all possible levels and their aesthetics
+  all_colors <- c(
+    "Empirical" = "blue", 
+    "Fitted" = "red",
+    "Empirical Mean" = "darkblue",
+    "Fitted Mean" = "darkred"
+  )
+  all_linetypes <- c(
+    "Empirical" = "solid", 
+    "Fitted" = "solid",
+    "Empirical Mean" = "dashed",
+    "Fitted Mean" = "dashed"
   )
 
   # Create plot
-  p <- ggplot(plot_data, aes(x = x, y = y, color = type)) +
-    geom_step(data = empirical_df, linewidth = 1) +
-    geom_line(data = fitted_df, linewidth = 1) +
-    geom_vline(data = means_df, aes(xintercept = xintercept, color = type), 
-               linetype = "dashed", linewidth = 0.8) +
+  p <- ggplot() +
+    geom_step(data = empirical_df, aes(x = x, y = y, color = type, linetype = type), linewidth = 1) +
+    geom_line(data = fitted_df, aes(x = x, y = y, color = type, linetype = type), linewidth = 1)
+  
+  if (nrow(means_df) > 0) {
+    p <- p + geom_vline(data = means_df, aes(xintercept = xintercept, color = type, linetype = type), 
+                        linewidth = 0.8)
+  }
+
+  p <- p +
     labs(
       title = title,
       x = x_label,
       y = y_label,
-      color = "Legend"
+      color = "Legend",
+      linetype = "Legend"
     ) +
-    coord_cartesian(xlim = x_range) + # Focus on data range
+    coord_cartesian(xlim = x_range) + 
     theme_minimal() +
     theme(
       legend.position = "top",
       plot.title = element_text(hjust = 0.5, face = "bold")
     ) +
-    scale_color_manual(values = c(
-      "Empirical" = "blue", 
-      "Fitted" = "red",
-      "Empirical Mean" = "darkblue",
-      "Fitted Mean" = "darkred"
-    ))
+    scale_color_manual(values = all_colors) +
+    scale_linetype_manual(values = all_linetypes)
 
   if (log_x) {
     p <- p + scale_x_log10()

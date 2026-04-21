@@ -16,18 +16,19 @@ base_dir <- dirname(current_file)
 
 if (base_dir == ".") {
   # Fallback for interactive use or if sys.frame(1)$ofile is not available
-  source("dist/lognormal.R")
-  source("dist/normal.R")
-  source("dist/weibull.R")
-  source("dist/pareto.R")
-  source("dist/gb2.R")
-  source("dist/dpln.R")
-  source("dist/kappa4.R")
-  source("dist/bradford.R")
-  source("dist/johnsonsu.R")
-  source("dist/johnsonsb.R")
-  source("dist/johnsonsl.R")
-  source("dist/fisk.R")
+  source("dist/lognormal_2p.R")
+  source("dist/normal_2p.R")
+  source("dist/weibull_2p.R")
+  source("dist/pareto_2p.R")
+  source("dist/gb2_4p.R")
+  source("dist/dpln_4p.R")
+  source("dist/kappa4_4p.R")
+  source("dist/bradford_1p.R")
+  source("dist/johnsonsu_4p.R")
+  source("dist/johnsonsb_4p.R")
+  source("dist/johnsonsl_3p.R")
+  source("dist/fisk_2p.R")
+  source("definitions.R")
   source("fit.R")
   source("fit_2m.R")
   source("fit_3m.R")
@@ -35,19 +36,21 @@ if (base_dir == ".") {
   source("mixture_fit_mean.R")
   source("plots/cdf_plot.R")
   source("plots/pdf_plot.R")
+  source("plots/diag_plot.R")
 } else {
-  source(file.path(base_dir, "dist/lognormal.R"))
-  source(file.path(base_dir, "dist/normal.R"))
-  source(file.path(base_dir, "dist/weibull.R"))
-  source(file.path(base_dir, "dist/pareto.R"))
-  source(file.path(base_dir, "dist/gb2.R"))
-  source(file.path(base_dir, "dist/dpln.R"))
-  source(file.path(base_dir, "dist/kappa4.R"))
-  source(file.path(base_dir, "dist/bradford.R"))
-  source(file.path(base_dir, "dist/johnsonsu.R"))
-  source(file.path(base_dir, "dist/johnsonsb.R"))
-  source(file.path(base_dir, "dist/johnsonsl.R"))
-  source(file.path(base_dir, "dist/fisk.R"))
+  source(file.path(base_dir, "dist/lognormal_2p.R"))
+  source(file.path(base_dir, "dist/normal_2p.R"))
+  source(file.path(base_dir, "dist/weibull_2p.R"))
+  source(file.path(base_dir, "dist/pareto_2p.R"))
+  source(file.path(base_dir, "dist/gb2_4p.R"))
+  source(file.path(base_dir, "dist/dpln_4p.R"))
+  source(file.path(base_dir, "dist/kappa4_4p.R"))
+  source(file.path(base_dir, "dist/bradford_1p.R"))
+  source(file.path(base_dir, "dist/johnsonsu_4p.R"))
+  source(file.path(base_dir, "dist/johnsonsb_4p.R"))
+  source(file.path(base_dir, "dist/johnsonsl_3p.R"))
+  source(file.path(base_dir, "dist/fisk_2p.R"))
+  source(file.path(base_dir, "definitions.R"))
   source(file.path(base_dir, "fit.R"))
   source(file.path(base_dir, "fit_2m.R"))
   source(file.path(base_dir, "fit_3m.R"))
@@ -55,6 +58,7 @@ if (base_dir == ".") {
   source(file.path(base_dir, "mixture_fit_mean.R"))
   source(file.path(base_dir, "plots/cdf_plot.R"))
   source(file.path(base_dir, "plots/pdf_plot.R"))
+  source(file.path(base_dir, "plots/diag_plot.R"))
 }
 
 # Mixture Exports
@@ -67,6 +71,8 @@ mixture_pdf <- mixture_pdf
 #' @export
 mixture_cdf <- mixture_cdf
 #' @export
+mixture_quantile <- mixture_quantile
+#' @export
 mixture_rand <- mixture_rand
 #' @export
 mixture_mean <- mixture_mean
@@ -76,6 +82,8 @@ mixture_mean <- mixture_mean
 plot_cdf_comparison <- plot_cdf_comparison
 #' @export
 plot_pdf_comparison <- plot_pdf_comparison
+#' @export
+plot_diag <- plot_diag
 
 # Orchestrator Exports
 #' @export
@@ -636,15 +644,3 @@ johnsonsl_interval <- johnsonsl_interval
 johnsonsl_entropy <- johnsonsl_entropy
 #' @export
 johnsonsl_expect <- johnsonsl_expect
-
-# Mixture Exports
-#' @export
-mixture_fit <- mixture_fit
-#' @export
-mixture_pdf <- mixture_pdf
-#' @export
-mixture_cdf <- mixture_cdf
-#' @export
-mixture_rand <- mixture_rand
-#' @export
-mixture_mean <- mixture_mean

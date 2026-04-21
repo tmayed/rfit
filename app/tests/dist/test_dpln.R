@@ -1,6 +1,6 @@
 # Test suite for dPLN Distribution
 
-source("../../pkg/dist/dpln.R")
+source("../../pkg/dist/dpln_4p.R")
 
 # Test parameters
 fit <- list(alpha = 2.0, beta = 2.0, nu = 0, tau = 1.0)

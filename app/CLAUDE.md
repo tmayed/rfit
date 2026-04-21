@@ -13,18 +13,18 @@ rfit is an R package for probability distribution fitting using maximum likeliho
 
 ## Current Distributions
 
-- Lognormal (`pkg/dist/lognormal.R`)
-- Normal (`pkg/dist/normal.R`)
-- Weibull (`pkg/dist/weibull.R`)
-- Pareto (`pkg/dist/pareto.R`)
-- GB2 (`pkg/dist/gb2.R`)
-- dPLN (`pkg/dist/dpln.R`)
-- Bradford (`pkg/dist/bradford.R`)
-- Fisk (`pkg/dist/fisk.R`)
-- Johnson SB (`pkg/dist/johnsonsb.R`)
-- Johnson SL (`pkg/dist/johnsonsl.R`)
-- Johnson SU (`pkg/dist/johnsonsu.R`)
-- Kappa 4 (`pkg/dist/kappa4.R`)
+- Lognormal (`pkg/dist/lognormal_2p.R`)
+- Normal (`pkg/dist/normal_2p.R`)
+- Weibull (`pkg/dist/weibull_2p.R`)
+- Pareto (`pkg/dist/pareto_2p.R`)
+- GB2 (`pkg/dist/gb2_4p.R`)
+- dPLN (`pkg/dist/dpln_4p.R`)
+- Bradford (`pkg/dist/bradford_1p.R`)
+- Fisk (`pkg/dist/fisk_2p.R`)
+- Johnson SB (`pkg/dist/johnsonsb_4p.R`)
+- Johnson SL (`pkg/dist/johnsonsl_3p.R`)
+- Johnson SU (`pkg/dist/johnsonsu_4p.R`)
+- Kappa 4 (`pkg/dist/kappa4_4p.R`)
 - Mixture (`pkg/mixture.R`)
 
 ## Function Naming Convention
