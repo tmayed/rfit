@@ -49,10 +49,6 @@ for (i in 1:length(fit$weights)) {
   dist_name <- fit$dist_names[i]
 
   # Calculate component mean
-  mean_func <- get(paste0(dist_name, "_mean"))
-  c_mean <- mean_func(comp_params)
-  component_means[i] <- c_mean
-  cat(sprintf("  Component Mean: %.4f\n", c_mean))
 
   cat(sprintf("Component %d (%s):\n", i, dist_name))
   cat(sprintf("  Weight: %.4f\n", fit$weights[i]))
@@ -62,7 +58,15 @@ for (i in 1:length(fit$weights)) {
       cat(sprintf("  %s: %.4f\n", pname, comp_params[[pname]]))
     }
   }
+
+  # Calculate component mean
+  mean_func <- get(paste0(dist_name, "_mean"))
+  c_mean <- mean_func(comp_params)
+  cat(sprintf("  Component Mean: %.4f\n", c_mean))
+
 }
+
+
 
 # for (i in 1:length(fit$weights)) {
 #   dist_name <- fit$dist_names[i]
@@ -70,10 +74,7 @@ for (i in 1:length(fit$weights)) {
 #   cat(sprintf("  Weight: %.4f\n", fit$weights[i]))
 #   comp_params <- fit$components[[i]]
   
-#   # Calculate component mean
-#   mean_func <- get(paste0(dist_name, "_mean"))
-#   c_mean <- mean_func(comp_params)
-#   cat(sprintf("  Component Mean: %.4f\n", c_mean))
+
 # }
 
 mixture_theoretical_mean <- mixture_mean(fit)
