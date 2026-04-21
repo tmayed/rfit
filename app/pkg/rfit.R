@@ -32,6 +32,7 @@ if (base_dir == ".") {
   source("fit_2m.R")
   source("fit_3m.R")
   source("mixture.R")
+  source("mixture_fit_mean.R")
   source("plots/cdf_plot.R")
   source("plots/pdf_plot.R")
 } else {
@@ -51,9 +52,24 @@ if (base_dir == ".") {
   source(file.path(base_dir, "fit_2m.R"))
   source(file.path(base_dir, "fit_3m.R"))
   source(file.path(base_dir, "mixture.R"))
+  source(file.path(base_dir, "mixture_fit_mean.R"))
   source(file.path(base_dir, "plots/cdf_plot.R"))
   source(file.path(base_dir, "plots/pdf_plot.R"))
 }
+
+# Mixture Exports
+#' @export
+mixture_fit <- mixture_fit
+#' @export
+mixture_fit_mean <- mixture_fit_mean
+#' @export
+mixture_pdf <- mixture_pdf
+#' @export
+mixture_cdf <- mixture_cdf
+#' @export
+mixture_rand <- mixture_rand
+#' @export
+mixture_mean <- mixture_mean
 
 # Plotting Exports
 #' @export

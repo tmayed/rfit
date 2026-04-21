@@ -1,17 +1,20 @@
 FROM r-base
 
 # 1. Install openssh-server alongside your other dependencies
-RUN apt-get update && apt-get install -y curl openssh-server \
+RUN apt-get update && apt-get install -y \
+    curl \
+    openssh-server \
+    libcurl4-openssl-dev \
+    libssl-dev \
+    libxml2-dev \
     && rm -rf /var/lib/apt/lists/*
-    
+
 # Create the privilege separation directory required by SSH
 RUN mkdir -p /run/sshd
 
 # 2. Install renv package
 RUN R -e 'install.packages("renv", repos="https://cloud.r-project.org")'
-RUN R -e 'install.packages("ggplot2")'
-RUN R -e 'install.packages("dplyr")'
-RUN R -e 'install.packages("tidy")'
+RUN R -e 'install.packages(c("ggplot2","dplyr","tidyr"), repos="https://cloud.r-project.org")'
 
 # 3. Create a dedicated user for ID 1000 (so SSH has a home directory to route to)
 # Find the existing user with UID 1000, delete them, and create our appuser
