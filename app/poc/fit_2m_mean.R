@@ -48,8 +48,6 @@ cat(sprintf("Log-Likelihood (penalized): %.4f\n", fit$log_likelihood))
 for (i in 1:length(fit$weights)) {
   dist_name <- fit$dist_names[i]
 
-  # Calculate component mean
-
   cat(sprintf("Component %d (%s):\n", i, dist_name))
   cat(sprintf("  Weight: %.4f\n", fit$weights[i]))
   comp_params <- fit$components[[i]]
@@ -66,24 +64,55 @@ for (i in 1:length(fit$weights)) {
 
 }
 
-
-
-# for (i in 1:length(fit$weights)) {
-#   dist_name <- fit$dist_names[i]
-#   cat(sprintf("Component %d (%s):\n", i, dist_name))
-#   cat(sprintf("  Weight: %.4f\n", fit$weights[i]))
-#   comp_params <- fit$components[[i]]
-  
-
-# }
-
 mixture_theoretical_mean <- mixture_mean(fit)
 cat("\n=== Mean Comparison ===\n")
 cat(sprintf("Mixture Theoretical Mean: %.4f\n", mixture_theoretical_mean))
 cat(sprintf("Empirical Mean:          %.4f\n", empirical_mean))
 cat(sprintf("Difference:              %.4e\n", mixture_theoretical_mean - empirical_mean))
 
+# 5. Export results to CSV
+output_dir <- "outputs"
+if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
+
+cat("\nExporting results to CSV...\n")
+fit_results_df <- data.frame(
+  distribution = character(),
+  param = character(),
+  value = numeric(),
+  stringsAsFactors = FALSE
+)
+
+for (i in 1:length(fit$weights)) {
+  dist_name <- fit$dist_names[i]
+  weight <- fit$weights[i]
+  comp_params <- fit$components[[i]]
+
+  # Add weight
+  fit_results_df <- rbind(fit_results_df, data.frame(
+    distribution = dist_name,
+    param = "weight",
+    value = weight
+  ))
+
+  # Add params
+  for (p_name in names(comp_params)) {
+    # Skip non-parameter elements if any
+    if (is.numeric(comp_params[[p_name]]) && length(comp_params[[p_name]]) == 1) {
+      fit_results_df <- rbind(fit_results_df, data.frame(
+        distribution = dist_name,
+        param = p_name,
+        value = comp_params[[p_name]]
+      ))
+    }
+  }
+}
+
+csv_output_file <- file.path(output_dir, "fit_2m_mean_constrained.csv")
+write.csv(fit_results_df, csv_output_file, row.names = FALSE)
+cat(sprintf("Results exported to %s\n", csv_output_file))
+
 # 6. Plots
+
 output_dir <- "outputs"
 if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
 
