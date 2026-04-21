@@ -17,35 +17,49 @@ if (!exists(".dist_params")) {
 # -------------------------------
 # Mixture Fit
 # -------------------------------
-mixture_fit <- function(data, dist_names) {
+#' @param initial_fit Optional previous fit object to use as starting parameters (warm start)
+#' @param quiet Logical, if TRUE suppresses terminal output
+#' @param ordered Logical, if TRUE enforces mean(comp 1) < mean(comp 2) < ...
+mixture_fit <- function(data, dist_names, initial_fit = NULL, quiet = FALSE, ordered = TRUE) {
   data <- data[!is.na(data) & data > 0]
   K <- length(dist_names)
   
-  # Initialization: Simple split
+  # 1. Initialization
   initial_dist_params_list <- list()
   param_counts <- numeric(K)
-  data_sorted <- sort(data)
   
-  for (i in 1:K) {
-    name <- dist_names[i]
-    fit_func <- get(paste0(name, "_fit"))
-    # Split data into K chunks
-    idx <- floor((i-1)*length(data)/K + 1) : floor(i*length(data)/K)
-    fit_obj <- tryCatch(fit_func(data_sorted[idx]), error = function(e) fit_func(data))
-    initial_dist_params_list[[i]] <- .dist_params[[name]]$to_internal(fit_obj)
-    param_counts[i] <- length(initial_dist_params_list[[i]])
+  if (!is.null(initial_fit) && all(initial_fit$dist_names == dist_names)) {
+    if (!quiet) cat("Using warm start from initial_fit...\n")
+    for (i in 1:K) {
+      initial_dist_params_list[[i]] <- .dist_params[[dist_names[i]]]$to_internal(initial_fit$components[[i]])
+      param_counts[i] <- length(initial_dist_params_list[[i]])
+    }
+    # Convert weights to multinomial logit scale (using last component as reference)
+    initial_weights_raw <- log(initial_fit$weights[1:(K-1)] / initial_fit$weights[K])
+  } else {
+    data_sorted <- sort(data)
+    for (i in 1:K) {
+      name <- dist_names[i]
+      fit_func <- get(paste0(name, "_fit"))
+      # Split data into K chunks
+      idx <- floor((i-1)*length(data)/K + 1) : floor(i*length(data)/K)
+      fit_obj <- tryCatch(fit_func(data_sorted[idx]), error = function(e) fit_func(data))
+      initial_dist_params_list[[i]] <- .dist_params[[name]]$to_internal(fit_obj)
+      param_counts[i] <- length(initial_dist_params_list[[i]])
+    }
+    initial_weights_raw <- rep(0, K-1)
   }
   
   unpack <- function(params) {
     w_raw <- c(params[1:(K-1)], 0)
-    w_raw <- pmax(-20, pmin(20, w_raw))
+    w_raw <- pmax(-15, pmin(15, w_raw)) # Prevent overflow
     weights <- exp(w_raw) / sum(exp(w_raw))
     dist_fits <- list()
     curr <- K
     for (i in 1:K) {
         p_vec <- params[curr:(curr + param_counts[i] - 1)]
         # STRICT BOUNDS ON INTERNAL PARAMS
-        p_vec <- pmax(-8, pmin(8, p_vec))
+        p_vec <- pmax(-10, pmin(10, p_vec))
         dist_fits[[i]] <- .dist_params[[dist_names[i]]]$from_internal(p_vec)
         dist_fits[[i]]$distribution <- dist_names[i]
         curr <- curr + param_counts[i]
@@ -58,23 +72,51 @@ mixture_fit <- function(data, dist_names) {
     if (is.null(unpacked)) return(1e15)
     
     total_dens <- numeric(length(data))
+    comp_means <- numeric(K)
+    
     for (i in 1:K) {
       pdf_func <- get(paste0(dist_names[i], "_pdf"))
       dens <- tryCatch(pdf_func(data, unpacked$dist_fits[[i]]), error = function(e) rep(0, length(data)))
       dens[!is.finite(dens)] <- 0
-      dens[dens > 100] <- 100 # AGGRESSIVE CAP to prevent spikes
       total_dens <- total_dens + unpacked$weights[i] * dens
+      
+      # For ordering penalty
+      if (ordered) {
+        mean_func <- get(paste0(dist_names[i], "_mean"))
+        comp_means[i] <- tryCatch(mean_func(unpacked$dist_fits[[i]]), error = function(e) Inf)
+      }
     }
     
-    total_dens[total_dens < 1e-10] <- 1e-10
-    -sum(log(total_dens))
+    total_dens[total_dens < 1e-12] <- 1e-12
+    ll <- sum(log(total_dens))
+    
+    # Stability Penalties
+    penalty <- 0
+    
+    # 1. Mean Ordering Penalty (Enforce Head vs Tail)
+    if (ordered && K > 1) {
+      for (i in 1:(K-1)) {
+        if (is.finite(comp_means[i]) && is.finite(comp_means[i+1])) {
+          if (comp_means[i] > comp_means[i+1]) {
+            # Quadratic penalty for crossover on log-scale
+            penalty <- penalty + 1e5 * (log(comp_means[i]) - log(comp_means[i+1]))^2
+          }
+        }
+      }
+    }
+    
+    # 2. Regularization (Prevent extreme parameters)
+    # Penalize large absolute values of internal parameters
+    penalty <- penalty + 1e-4 * sum(params^2)
+    
+    -ll + penalty
   }
 
   fit <- optim(
-    par = c(rep(0, K-1), unlist(initial_dist_params_list)),
+    par = c(initial_weights_raw, unlist(initial_dist_params_list)),
     fn = neg_log_likelihood,
     method = "Nelder-Mead",
-    control = list(maxit = 3000)
+    control = list(maxit = 5000)
   )
   
   final <- unpack(fit$par)
@@ -82,7 +124,8 @@ mixture_fit <- function(data, dist_names) {
     weights = final$weights, components = final$dist_fits,
     log_likelihood = -fit$value, n = length(data),
     distribution = "mixture", dist_names = dist_names,
-    convergence = fit$convergence
+    convergence = fit$convergence,
+    params_internal = fit$par # Useful for future warm starts
   )
   class(result) <- "mixture"
   result
