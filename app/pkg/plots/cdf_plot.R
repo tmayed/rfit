@@ -25,7 +25,9 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
                                 y_label = "Cumulative Probability",
                                 empirical_mean = NULL,
                                 fitted_mean = NULL,
-                                log_x = FALSE) {
+                                log_x = FALSE,
+                                log_y = FALSE,
+                                complementary = FALSE) {
 
   # Validate sample_data
   sample_data <- sample_data[!is.na(sample_data)]
@@ -40,6 +42,10 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
   n <- length(sample_data)
   sorted_data <- sort(sample_data)
   empirical_probs <- seq_len(n) / n
+  
+  if (complementary) {
+    empirical_probs <- 1 - (seq_len(n) - 0.5) / n # Standard plotting position for CCDF
+  }
 
   empirical_df <- data.frame(
     x = sorted_data,
@@ -57,6 +63,9 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
   }
   
   fitted_probs <- dist_cdf(x=x_points, fit=fit)
+  if (complementary) {
+    fitted_probs <- 1 - fitted_probs
+  }
 
   fitted_df <- data.frame(
     x = x_points,
@@ -65,6 +74,9 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
   )
   # Filter out non-finite values (should be fewer now)
   fitted_df <- fitted_df[is.finite(fitted_df$x) & is.finite(fitted_df$y), ]
+  if (complementary) {
+    fitted_df <- fitted_df[fitted_df$y > 0, ] # Avoid log(0)
+  }
 
   # Calculate means if not provided
   if (is.null(empirical_mean)) {
@@ -147,6 +159,9 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
 
   if (log_x) {
     p <- p + scale_x_log10()
+  }
+  if (log_y) {
+    p <- p + scale_y_log10()
   }
 
   # Save plot

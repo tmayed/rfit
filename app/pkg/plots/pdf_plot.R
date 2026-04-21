@@ -19,7 +19,9 @@ plot_pdf_comparison <- function(sample_data, fit, dist_pdf,
                                 x_label = "Value",
                                 y_label = "Density",
                                 empirical_mean = NULL,
-                                fitted_mean = NULL) {
+                                fitted_mean = NULL,
+                                log_x = FALSE,
+                                log_y = FALSE) {
 
   # Validate sample_data
   sample_data <- sample_data[!is.na(sample_data)]
@@ -32,8 +34,12 @@ plot_pdf_comparison <- function(sample_data, fit, dist_pdf,
 
   # Range for plotting
   x_range <- range(sample_data)
-  # Increase resolution for better curves
-  x_points <- seq(x_range[1], x_range[2], length.out = 1000)
+  if (log_x) {
+    x_range[1] <- max(x_range[1], 1e-6)
+    x_points <- exp(seq(log(x_range[1]), log(x_range[2]), length.out = 1000))
+  } else {
+    x_points <- seq(x_range[1], x_range[2], length.out = 1000)
+  }
   
   # Calculate fitted PDF
   fitted_dens <- dist_pdf(x=x_points, fit=fit)
@@ -117,6 +123,13 @@ plot_pdf_comparison <- function(sample_data, fit, dist_pdf,
       "Empirical Mean" = "darkblue",
       "Fitted Mean" = "darkred"
     ))
+
+  if (log_x) {
+    p <- p + scale_x_log10()
+  }
+  if (log_y) {
+    p <- p + scale_y_log10()
+  }
 
   # Save plot
   ggsave(output_file_full, plot = p, width = 10, height = 6, dpi = 150)

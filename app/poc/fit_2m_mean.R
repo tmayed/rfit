@@ -144,6 +144,22 @@ plot_cdf_comparison(
   log_x = TRUE
 )
 
+plot_cdf_comparison(
+  sample_data = data,
+  fit = fit,
+  dist_cdf = mixture_cdf,
+  output_dir = output_dir,
+  output_file = "fit_2m_mean_constrained_ccdf_loglog",
+  title = "2-Comp Mixture Fit (Mean Constrained) - CCDF (Log-Log Scale)",
+  x_label = "Value",
+  y_label = "Complementary Cumulative Probability",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean,
+  log_x = TRUE,
+  log_y = TRUE,
+  complementary = TRUE
+)
+
 plot_pdf_comparison(
   sample_data = data,
   fit = fit,
@@ -153,6 +169,31 @@ plot_pdf_comparison(
   title = "2-Comp Mixture Fit (Mean Constrained) - PDF",
   empirical_mean = empirical_mean,
   fitted_mean = mixture_theoretical_mean
+)
+
+plot_pdf_comparison(
+  sample_data = data,
+  fit = fit,
+  dist_pdf = mixture_pdf,
+  output_dir = output_dir,
+  output_file = "fit_2m_mean_constrained_pdf_logx",
+  title = "2-Comp Mixture Fit (Mean Constrained) - PDF (Log X Scale)",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean,
+  log_x = TRUE
+)
+
+plot_pdf_comparison(
+  sample_data = data,
+  fit = fit,
+  dist_pdf = mixture_pdf,
+  output_dir = output_dir,
+  output_file = "fit_2m_mean_constrained_pdf_loglog",
+  title = "2-Comp Mixture Fit (Mean Constrained) - PDF (Log-Log Scale)",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean,
+  log_x = TRUE,
+  log_y = TRUE
 )
 
 plot_mixture_diagnostic(
