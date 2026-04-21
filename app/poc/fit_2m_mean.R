@@ -9,6 +9,7 @@ if (file.exists("../renv/activate.R")) {
 source("../pkg/rfit.R")
 source("../pkg/plots/cdf_plot.R")
 source("../pkg/plots/pdf_plot.R")
+source("../pkg/plots/mixture_plot.R")
 
 # Prevent Rplots.pdf from being created
 if (!interactive()) {
@@ -17,6 +18,16 @@ if (!interactive()) {
 
 # 1. Load data
 input_file <- "inputs/whole_dataset.csv"
+input_name <- tools::file_path_sans_ext(basename(input_file))
+output_dir <- file.path("outputs", paste0(input_name, "_fit_2m_mean"))
+
+# Create or empty the output directory
+if (dir.exists(output_dir)) {
+  unlink(list.files(output_dir, full.names = TRUE), recursive = TRUE)
+} else {
+  dir.create(output_dir, recursive = TRUE)
+}
+
 cat(sprintf("Loading data from: %s\n", input_file))
 raw_data <- read.csv(input_file)
 data <- raw_data$traffic
@@ -71,9 +82,6 @@ cat(sprintf("Empirical Mean:          %.4f\n", empirical_mean))
 cat(sprintf("Difference:              %.4e\n", mixture_theoretical_mean - empirical_mean))
 
 # 5. Export results to CSV
-output_dir <- "outputs"
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
 cat("\nExporting results to CSV...\n")
 fit_results_df <- data.frame(
   distribution = character(),
@@ -113,9 +121,6 @@ cat(sprintf("Results exported to %s\n", csv_output_file))
 
 # 6. Plots
 
-output_dir <- "outputs"
-if (!dir.exists(output_dir)) dir.create(output_dir, recursive = TRUE)
-
 plot_cdf_comparison(
   sample_data = data,
   fit = fit,
@@ -127,6 +132,18 @@ plot_cdf_comparison(
   fitted_mean = mixture_theoretical_mean
 )
 
+plot_cdf_comparison(
+  sample_data = data,
+  fit = fit,
+  dist_cdf = mixture_cdf,
+  output_dir = output_dir,
+  output_file = "fit_2m_mean_constrained_cdf_log",
+  title = "2-Comp Mixture Fit (Mean Constrained) - CDF (Log Scale)",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean,
+  log_x = TRUE
+)
+
 plot_pdf_comparison(
   sample_data = data,
   fit = fit,
@@ -136,6 +153,14 @@ plot_pdf_comparison(
   title = "2-Comp Mixture Fit (Mean Constrained) - PDF",
   empirical_mean = empirical_mean,
   fitted_mean = mixture_theoretical_mean
+)
+
+plot_mixture_diagnostic(
+  sample_data = data,
+  fit = fit,
+  output_dir = output_dir,
+  prefix = "fit_2m_mean_diag",
+  transform = "log"
 )
 
 cat("\nProcessing complete.\n")

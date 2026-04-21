@@ -24,7 +24,8 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
                                 x_label = "Value",
                                 y_label = "Cumulative Probability",
                                 empirical_mean = NULL,
-                                fitted_mean = NULL) {
+                                fitted_mean = NULL,
+                                log_x = FALSE) {
 
   # Validate sample_data
   sample_data <- sample_data[!is.na(sample_data)]
@@ -48,8 +49,13 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
 
   # Create fitted CDF data
   x_range <- range(sample_data)
-  # Increase resolution for better curves
-  x_points <- seq(x_range[1], x_range[2], length.out = 1000)
+  if (log_x) {
+    x_range[1] <- max(x_range[1], 1e-6)
+    x_points <- exp(seq(log(x_range[1]), log(x_range[2]), length.out = 1000))
+  } else {
+    x_points <- seq(x_range[1], x_range[2], length.out = 1000)
+  }
+  
   fitted_probs <- dist_cdf(x=x_points, fit=fit)
 
   fitted_df <- data.frame(
@@ -138,6 +144,10 @@ plot_cdf_comparison <- function(sample_data, fit, dist_cdf,
       "Empirical Mean" = "darkblue",
       "Fitted Mean" = "darkred"
     ))
+
+  if (log_x) {
+    p <- p + scale_x_log10()
+  }
 
   # Save plot
   ggsave(output_file_full, plot = p, width = 10, height = 6, dpi = 150)
