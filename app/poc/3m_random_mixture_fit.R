@@ -17,7 +17,7 @@ if (!interactive()) {
 set.seed(Sys.time())
 
 # 1. Define a list of well-behaved distributions for generation
-gen_dists <- c("lognormal", "weibull", "pareto", "fisk")
+gen_dists <- c("lognormal_2p", "weibull_2p", "pareto_2p", "fisk_2p")
 
 # 2. Randomly pick three distributions
 picked <- sample(gen_dists, 3, replace = TRUE)
@@ -31,14 +31,14 @@ cat(sprintf("Weights: %.2f (%s), %.2f (%s), %.2f (%s)\n",
 
 # 4. Generate random parameters for each component
 gen_params <- function(name) {
-  if (name == "lognormal") {
-    list(mu = runif(1, 0, 2), sigma = runif(1, 0.2, 0.8), distribution = "lognormal")
-  } else if (name == "weibull") {
-    list(shape = runif(1, 1, 3), scale = runif(1, 1, 10), distribution = "weibull")
-  } else if (name == "pareto") {
-    list(shape = runif(1, 2, 5), scale = runif(1, 1, 2), distribution = "pareto")
-  } else if (name == "fisk") {
-    list(scale = runif(1, 2, 8), shape = runif(1, 2, 5), distribution = "fisk")
+  if (name == "lognormal_2p") {
+    list(mu = runif(1, 0, 2), sigma = runif(1, 0.2, 0.8), distribution = "lognormal_2p")
+  } else if (name == "weibull_2p") {
+    list(shape = runif(1, 1, 3), scale = runif(1, 1, 10), distribution = "weibull_2p")
+  } else if (name == "pareto_2p") {
+    list(shape = runif(1, 2, 5), scale = runif(1, 1, 2), distribution = "pareto_2p")
+  } else if (name == "fisk_2p") {
+    list(scale = runif(1, 2, 8), shape = runif(1, 2, 5), distribution = "fisk_2p")
   }
 }
 

@@ -52,7 +52,7 @@ cat(sprintf("\nBest fitting distribution: %s (%s: %.4f)\n",
 
 # 5. Create CDF plot for the best fit
 output_dir <- "outputs"
-output_file <- "danish_best_fit_cdf"
+output_file <- "data_best_fit_cdf"
 
 # Ensure output directory exists
 if (!dir.exists(output_dir)) {

@@ -33,18 +33,19 @@ cat(sprintf("Loaded %d observations from %s, using subset of %d\n",
 
 # 3. Fit all 2-component mixtures
 cat("\nFitting all 2-component mixtures using fit_all_2m()...\n")
-all_fits <- fit_all_2m(sample_data, criterion = "AIC")
+all_fits <- fit_all_2m(sample_data, criterion = "BIC")
 
 # 4. Display top results
-cat("\nTop 10 Mixture Fitting Results (ordered by AIC):\n")
-cat(sprintf("%-25s | %-15s | %s\n", "Mixture", "AIC", "Log-Likelihood"))
-cat(paste(rep("-", 60), collapse = ""), "\n")
+cat("\nTop 25 Mixture Fitting Results (ordered by AIC):\n")
+cat(sprintf("%-25s | %-12s | %-12s | %s\n", "Mixture", "AIC", "BIC", "Log-Lik"))
+cat(paste(rep("-", 75), collapse = ""), "\n")
 
-for (i in 1:min(10, length(all_fits))) {
+for (i in 1:min(25, length(all_fits))) {
   fit <- all_fits[[i]]
-  cat(sprintf("%-25s | %-15.2f | %-15.2f\n", 
+  cat(sprintf("%-25s | %-12.2f | %-12.2f | %-15.2f\n", 
               fit$distribution_mixture, 
-              fit$fit_criterion_value, 
+              AIC(fit), 
+              BIC(fit),
               fit$log_likelihood))
 }
 
@@ -57,7 +58,7 @@ cat(sprintf("\nBest fitting mixture: %s (%s: %.4f)\n",
 
 # 6. Create CDF plot for the best fit
 output_dir <- "outputs"
-output_file <- "2m_best_fit_comparison"
+output_file <- "poc_best_fit_2m"
 
 if (!dir.exists(output_dir)) {
   dir.create(output_dir, recursive = TRUE)

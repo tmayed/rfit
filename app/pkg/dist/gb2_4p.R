@@ -3,7 +3,7 @@
 # -------------------------------
 # Log-likelihood (pure)
 # -------------------------------
-gb2_log_likelihood <- function(data, a, b, p, q) {
+gb2_4p_log_likelihood <- function(data, a, b, p, q) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -22,7 +22,7 @@ gb2_log_likelihood <- function(data, a, b, p, q) {
 # -------------------------------
 # Fit GB2 (MLE via optim)
 # -------------------------------
-gb2_fit <- function(data) {
+gb2_4p_fit <- function(data) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -47,7 +47,7 @@ gb2_fit <- function(data) {
     # Avoid numerical issues
     if (any(c(a, b, p, q) < 1e-8)) return(Inf)
 
-    -gb2_log_likelihood(data, a, b, p, q)
+    -gb2_4p_log_likelihood(data, a, b, p, q)
   }
 
   fit <- optim(
@@ -62,7 +62,7 @@ gb2_fit <- function(data) {
   p_hat <- exp(fit$par[3])
   q_hat <- exp(fit$par[4])
 
-  log_lik <- gb2_log_likelihood(data, a_hat, b_hat, p_hat, q_hat)
+  log_lik <- gb2_4p_log_likelihood(data, a_hat, b_hat, p_hat, q_hat)
 
   result <- list(
     a = a_hat,
@@ -71,11 +71,11 @@ gb2_fit <- function(data) {
     q = q_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "gb2",
+    distribution = "gb2_4p",
     convergence = fit$convergence
   )
 
-  class(result) <- "gb2"
+  class(result) <- "gb2_4p"
   result
 }
 
@@ -83,7 +83,7 @@ gb2_fit <- function(data) {
 # -------------------------------
 # Truncated GB2 (MLE via optim)
 # -------------------------------
-gb2_log_likelihood_truncated <- function(data, a, b, p, q, lower, upper) {
+gb2_4p_log_likelihood_truncated <- function(data, a, b, p, q, lower, upper) {
   if (a <= 0 || b <= 0 || p <= 0 || q <= 0 || lower < 0) return(-Inf)
 
   data <- data[data >= lower & data <= upper]
@@ -125,7 +125,7 @@ gb2_log_likelihood_truncated <- function(data, a, b, p, q, lower, upper) {
 }
 
 
-gb2_fit_truncated <- function(data, lower = 0, upper = Inf) {
+gb2_4p_fit_truncated <- function(data, lower = 0, upper = Inf) {
   data <- data[!is.na(data)]
   data <- data[data >= lower & data <= upper]
 
@@ -147,7 +147,7 @@ gb2_fit_truncated <- function(data, lower = 0, upper = Inf) {
 
     if (any(c(a, b, p, q) < 1e-8)) return(Inf)
 
-    -gb2_log_likelihood_truncated(data, a, b, p, q, lower, upper)
+    -gb2_4p_log_likelihood_truncated(data, a, b, p, q, lower, upper)
   }
 
   fit <- optim(
@@ -162,7 +162,7 @@ gb2_fit_truncated <- function(data, lower = 0, upper = Inf) {
   p_hat <- exp(fit$par[3])
   q_hat <- exp(fit$par[4])
 
-  log_lik <- gb2_log_likelihood_truncated(
+  log_lik <- gb2_4p_log_likelihood_truncated(
     data, a_hat, b_hat, p_hat, q_hat, lower, upper
   )
 
@@ -176,10 +176,10 @@ gb2_fit_truncated <- function(data, lower = 0, upper = Inf) {
     lower = lower,
     upper = upper,
     convergence = fit$convergence,
-    distribution = "truncated_gb2"
+    distribution = "truncated_gb2_4p"
   )
 
-  class(result) <- "truncated_gb2"
+  class(result) <- "truncated_gb2_4p"
   result
 }
 
@@ -187,7 +187,7 @@ gb2_fit_truncated <- function(data, lower = 0, upper = Inf) {
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-gb2_pdf <- function(x, fit) {
+gb2_4p_pdf <- function(x, fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -206,7 +206,7 @@ gb2_pdf <- function(x, fit) {
 }
 
 
-gb2_cdf <- function(x, fit) {
+gb2_4p_cdf <- function(x, fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -230,7 +230,7 @@ gb2_cdf <- function(x, fit) {
 }
 
 
-gb2_quantile <- function(prob, fit) {
+gb2_4p_quantile <- function(prob, fit) {
   if (any(prob < 0 | prob > 1)) {
     stop("Probabilities must be in [0,1]")
   }
@@ -253,24 +253,24 @@ gb2_quantile <- function(prob, fit) {
 }
 
 
-gb2_rand <- function(n, fit) {
+gb2_4p_rand <- function(n, fit) {
   u <- runif(n)
-  gb2_quantile(u, fit)
+  gb2_4p_quantile(u, fit)
 }
 
 
 # -------------------------------
 # Survival / Inverse Survival / Logs
 # -------------------------------
-gb2_sf <- function(x, fit) {
-  1 - gb2_cdf(x, fit)
+gb2_4p_sf <- function(x, fit) {
+  1 - gb2_4p_cdf(x, fit)
 }
 
-gb2_isf <- function(p, fit) {
-  gb2_quantile(1 - p, fit)
+gb2_4p_isf <- function(p, fit) {
+  gb2_4p_quantile(1 - p, fit)
 }
 
-gb2_logpdf <- function(x, fit) {
+gb2_4p_logpdf <- function(x, fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -284,19 +284,19 @@ gb2_logpdf <- function(x, fit) {
   out
 }
 
-gb2_logcdf <- function(x, fit) {
-  log(gb2_cdf(x, fit))
+gb2_4p_logcdf <- function(x, fit) {
+  log(gb2_4p_cdf(x, fit))
 }
 
-gb2_logsf <- function(x, fit) {
-  log(gb2_sf(x, fit))
+gb2_4p_logsf <- function(x, fit) {
+  log(gb2_4p_sf(x, fit))
 }
 
 
 # -------------------------------
 # Moments
 # -------------------------------
-gb2_mean <- function(fit) {
+gb2_4p_mean <- function(fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -307,7 +307,7 @@ gb2_mean <- function(fit) {
   exp(log(b) + lbeta(p + 1 / a, q - 1 / a) - lbeta(p, q))
 }
 
-gb2_var <- function(fit) {
+gb2_4p_var <- function(fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -317,15 +317,15 @@ gb2_var <- function(fit) {
 
   log_mean_sq <- 2 * log(b) + lbeta(p + 2 / a, q - 2 / a) - lbeta(p, q)
   mean_sq <- exp(log_mean_sq)
-  m <- gb2_mean(fit)
+  m <- gb2_4p_mean(fit)
   max(0, mean_sq - m^2)
 }
 
-gb2_std <- function(fit) {
-  sqrt(gb2_var(fit))
+gb2_4p_std <- function(fit) {
+  sqrt(gb2_4p_var(fit))
 }
 
-gb2_moment <- function(n, fit) {
+gb2_4p_moment <- function(n, fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -337,7 +337,7 @@ gb2_moment <- function(n, fit) {
   exp(n * log(b) + lbeta(p + n / a, q - n / a) - lbeta(p, q))
 }
 
-gb2_skew <- function(fit) {
+gb2_4p_skew <- function(fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -345,15 +345,15 @@ gb2_skew <- function(fit) {
   
   if (a * q <= 3) return(NA)
   
-  m1 <- gb2_moment(1, fit)
-  m2 <- gb2_moment(2, fit)
-  m3 <- gb2_moment(3, fit)
+  m1 <- gb2_4p_moment(1, fit)
+  m2 <- gb2_4p_moment(2, fit)
+  m3 <- gb2_4p_moment(3, fit)
   sigma <- sqrt(m2 - m1^2)
   
   (m3 - 3*m1*sigma^2 - m1^3) / sigma^3
 }
 
-gb2_kurtosis <- function(fit) {
+gb2_4p_kurtosis <- function(fit) {
   a <- fit$a
   b <- fit$b
   p <- fit$p
@@ -361,10 +361,10 @@ gb2_kurtosis <- function(fit) {
   
   if (a * q <= 4) return(NA)
   
-  m1 <- gb2_moment(1, fit)
-  m2 <- gb2_moment(2, fit)
-  m3 <- gb2_moment(3, fit)
-  m4 <- gb2_moment(4, fit)
+  m1 <- gb2_4p_moment(1, fit)
+  m2 <- gb2_4p_moment(2, fit)
+  m3 <- gb2_4p_moment(3, fit)
+  m4 <- gb2_4p_moment(4, fit)
   sigma2 <- m2 - m1^2
   
   # Central 4th moment: E[(X-mu)^4] = E[X^4] - 4*mu*E[X^3] + 6*mu^2*E[X^2] - 3*mu^4
@@ -374,28 +374,28 @@ gb2_kurtosis <- function(fit) {
   mu4 / sigma2^2
 }
 
-gb2_median <- function(fit) {
-  gb2_quantile(0.5, fit)
+gb2_4p_median <- function(fit) {
+  gb2_4p_quantile(0.5, fit)
 }
 
-gb2_interval <- function(level, fit) {
+gb2_4p_interval <- function(level, fit) {
   alpha <- (1 - level) / 2
-  gb2_quantile(c(alpha, 1 - alpha), fit)
+  gb2_4p_quantile(c(alpha, 1 - alpha), fit)
 }
 
 
 # -------------------------------
 # Entropy & Expect
 # -------------------------------
-gb2_entropy <- function(fit) {
+gb2_4p_entropy <- function(fit) {
   # Entropy for GB2 has a complex analytical form
   # Using numerical integration for reliability
-  -gb2_expect(function(x) gb2_logpdf(x, fit), fit)
+  -gb2_4p_expect(function(x) gb2_4p_logpdf(x, fit), fit)
 }
 
-gb2_expect <- function(func, fit, ...) {
+gb2_4p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * gb2_pdf(x, fit)
+    func(x, ...) * gb2_4p_pdf(x, fit)
   }
   
   # GB2 support is (0, Inf)
@@ -407,7 +407,7 @@ gb2_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3: logLik (enables AIC/BIC)
 # -------------------------------
-logLik.gb2 <- function(object, ...) {
+logLik.gb2_4p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 4,
@@ -416,7 +416,7 @@ logLik.gb2 <- function(object, ...) {
   )
 }
 
-logLik.truncated_gb2 <- function(object, ...) {
+logLik.truncated_gb2_4p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 4,

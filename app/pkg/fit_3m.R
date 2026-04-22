@@ -16,12 +16,8 @@ fit_all_3m <- function(data, criterion = c("AIC", "BIC")) {
     stop("Need at least 15 valid positive data points for 3-component mixture fitting.")
   }
 
-  # List of distribution names available for mixtures
-  distributions <- c(
-    "lognormal", "normal", "weibull", "pareto", "gb2", 
-    "dpln", "kappa4", "bradford", "fisk", 
-    "johnsonsb", "johnsonsl", "johnsonsu"
-  )
+  # List of distribution names available for mixtures (sourced from definitions.R)
+  distributions <- names(.DIST_REGISTRY)
 
   # Generate all unique triples with NO repeats (distinct distributions)
   # combn returns a matrix where each column is a combination

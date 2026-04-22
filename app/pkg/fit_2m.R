@@ -16,12 +16,8 @@ fit_all_2m <- function(data, criterion = c("AIC", "BIC")) {
     stop("Need at least 10 valid positive data points for mixture fitting.")
   }
 
-  # List of distribution names available for mixtures (must be in .dist_params in mixture.R)
-  distributions <- c(
-    "lognormal", "normal", "weibull", "pareto", "gb2", 
-    "dpln", "kappa4", "bradford", "fisk", 
-    "johnsonsb", "johnsonsl", "johnsonsu"
-  )
+  # List of distribution names available for mixtures (must be in .DIST_REGISTRY in definitions.R)
+  distributions <- names(.DIST_REGISTRY)
 
   # Generate all unique pairs with NO repeats (distinct distributions)
   # combn returns a matrix where each column is a combination

@@ -3,7 +3,7 @@
 # -------------------------------
 # Log-likelihood (standard Pareto)
 # -------------------------------
-pareto_log_likelihood <- function(data, shape, scale) {
+pareto_2p_log_likelihood <- function(data, shape, scale) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -22,7 +22,7 @@ pareto_log_likelihood <- function(data, shape, scale) {
 # -------------------------------
 # Fit standard Pareto (closed-form MLE)
 # -------------------------------
-pareto_fit <- function(data) {
+pareto_2p_fit <- function(data) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -39,17 +39,17 @@ pareto_fit <- function(data) {
 
   shape_hat <- length(data) / denom
 
-  log_lik <- pareto_log_likelihood(data, shape_hat, scale_hat)
+  log_lik <- pareto_2p_log_likelihood(data, shape_hat, scale_hat)
 
   result <- list(
     shape = shape_hat,
     scale = scale_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "pareto"
+    distribution = "pareto_2p"
   )
 
-  class(result) <- "pareto"
+  class(result) <- "pareto_2p"
   result
 }
 
@@ -57,7 +57,7 @@ pareto_fit <- function(data) {
 # -------------------------------
 # Truncated Pareto (proper MLE)
 # -------------------------------
-pareto_log_likelihood_truncated <- function(data, shape, scale, lower, upper) {
+pareto_2p_log_likelihood_truncated <- function(data, shape, scale, lower, upper) {
   if (shape <= 0 || scale <= 0) return(-Inf)
   if (scale > lower) return(-Inf)  # IMPORTANT constraint
 
@@ -82,7 +82,7 @@ pareto_log_likelihood_truncated <- function(data, shape, scale, lower, upper) {
 }
 
 
-pareto_fit_truncated <- function(data, lower = NULL, upper = Inf) {
+pareto_2p_fit_truncated <- function(data, lower = NULL, upper = Inf) {
   data <- data[!is.na(data)]
 
   if (is.null(lower)) {
@@ -106,7 +106,7 @@ pareto_fit_truncated <- function(data, lower = NULL, upper = Inf) {
     # enforce scale <= lower
     if (scale > lower) return(Inf)
 
-    -pareto_log_likelihood_truncated(data, shape, scale, lower, upper)
+    -pareto_2p_log_likelihood_truncated(data, shape, scale, lower, upper)
   }
 
   fit <- optim(
@@ -121,7 +121,7 @@ pareto_fit_truncated <- function(data, lower = NULL, upper = Inf) {
   shape_hat <- exp(fit$par[1])
   scale_hat <- exp(fit$par[2])
 
-  log_lik <- pareto_log_likelihood_truncated(
+  log_lik <- pareto_2p_log_likelihood_truncated(
     data, shape_hat, scale_hat, lower, upper
   )
 
@@ -133,10 +133,10 @@ pareto_fit_truncated <- function(data, lower = NULL, upper = Inf) {
     lower = lower,
     upper = upper,
     convergence = fit$convergence,
-    distribution = "truncated_pareto"
+    distribution = "truncated_pareto_2p"
   )
 
-  class(result) <- "truncated_pareto"
+  class(result) <- "truncated_pareto_2p"
   result
 }
 
@@ -144,7 +144,7 @@ pareto_fit_truncated <- function(data, lower = NULL, upper = Inf) {
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-pareto_pdf <- function(x, fit) {
+pareto_2p_pdf <- function(x, fit) {
   out <- numeric(length(x))
   valid <- !is.na(x) & x >= fit$scale
 
@@ -153,12 +153,12 @@ pareto_pdf <- function(x, fit) {
 }
 
 
-pareto_cdf <- function(x, fit) {
+pareto_2p_cdf <- function(x, fit) {
   ifelse(x < fit$scale, 0, 1 - (fit$scale / x)^fit$shape)
 }
 
 
-pareto_quantile <- function(p, fit) {
+pareto_2p_quantile <- function(p, fit) {
   if (any(p < 0 | p > 1)) {
     stop("Probabilities must be in [0,1]")
   }
@@ -167,7 +167,7 @@ pareto_quantile <- function(p, fit) {
 }
 
 
-pareto_rand <- function(n, fit) {
+pareto_2p_rand <- function(n, fit) {
   u <- runif(n)
   fit$scale / (1 - u)^(1 / fit$shape)
 }
@@ -176,26 +176,26 @@ pareto_rand <- function(n, fit) {
 # -------------------------------
 # Survival / Inverse Survival / Logs
 # -------------------------------
-pareto_sf <- function(x, fit) {
+pareto_2p_sf <- function(x, fit) {
   ifelse(x < fit$scale, 1, (fit$scale / x)^fit$shape)
 }
 
-pareto_isf <- function(p, fit) {
+pareto_2p_isf <- function(p, fit) {
   fit$scale / p^(1 / fit$shape)
 }
 
-pareto_logpdf <- function(x, fit) {
+pareto_2p_logpdf <- function(x, fit) {
   out <- rep(-Inf, length(x))
   valid <- !is.na(x) & x >= fit$scale
   out[valid] <- log(fit$shape) + fit$shape * log(fit$scale) - (fit$shape + 1) * log(x[valid])
   out
 }
 
-pareto_logcdf <- function(x, fit) {
-  log(pareto_cdf(x, fit))
+pareto_2p_logcdf <- function(x, fit) {
+  log(pareto_2p_cdf(x, fit))
 }
 
-pareto_logsf <- function(x, fit) {
+pareto_2p_logsf <- function(x, fit) {
   ifelse(x < fit$scale, 0, fit$shape * (log(fit$scale) - log(x)))
 }
 
@@ -203,55 +203,55 @@ pareto_logsf <- function(x, fit) {
 # -------------------------------
 # Moments
 # -------------------------------
-pareto_mean <- function(fit) {
+pareto_2p_mean <- function(fit) {
   if (fit$shape <= 1) return(Inf)
   fit$scale * fit$shape / (fit$shape - 1)
 }
 
-pareto_var <- function(fit) {
+pareto_2p_var <- function(fit) {
   if (fit$shape <= 2) return(Inf)
   fit$scale^2 * fit$shape / ((fit$shape - 1)^2 * (fit$shape - 2))
 }
 
-pareto_std <- function(fit) {
-  sqrt(pareto_var(fit))
+pareto_2p_std <- function(fit) {
+  sqrt(pareto_2p_var(fit))
 }
 
-pareto_moment <- function(n, fit) {
+pareto_2p_moment <- function(n, fit) {
   if (fit$shape <= n) return(Inf)
   fit$shape * fit$scale^n / (fit$shape - n)
 }
 
-pareto_skew <- function(fit) {
+pareto_2p_skew <- function(fit) {
   if (fit$shape <= 3) return(NA)
   (2 * (1 + fit$shape) / (fit$shape - 3)) * sqrt((fit$shape - 2) / fit$shape)
 }
 
-pareto_kurtosis <- function(fit) {
+pareto_2p_kurtosis <- function(fit) {
   if (fit$shape <= 4) return(NA)
   3 * (fit$shape - 2) * (3 * fit$shape^2 + fit$shape + 2) / (fit$shape * (fit$shape - 3) * (fit$shape - 4))
 }
 
-pareto_median <- function(fit) {
+pareto_2p_median <- function(fit) {
   fit$scale * 2^(1 / fit$shape)
 }
 
-pareto_interval <- function(level, fit) {
+pareto_2p_interval <- function(level, fit) {
   alpha <- (1 - level) / 2
-  pareto_quantile(c(alpha, 1 - alpha), fit)
+  pareto_2p_quantile(c(alpha, 1 - alpha), fit)
 }
 
 
 # -------------------------------
 # Entropy & Expect
 # -------------------------------
-pareto_entropy <- function(fit) {
+pareto_2p_entropy <- function(fit) {
   log(fit$scale / fit$shape) + 1 / fit$shape + 1
 }
 
-pareto_expect <- function(func, fit, ...) {
+pareto_2p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * pareto_pdf(x, fit)
+    func(x, ...) * pareto_2p_pdf(x, fit)
   }
   # Pareto support is [scale, Inf)
   res <- integrate(integrand, lower = fit$scale, upper = Inf)
@@ -262,7 +262,7 @@ pareto_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3: logLik (enables AIC/BIC)
 # -------------------------------
-logLik.pareto <- function(object, ...) {
+logLik.pareto_2p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 2,
@@ -271,7 +271,7 @@ logLik.pareto <- function(object, ...) {
   )
 }
 
-logLik.truncated_pareto <- function(object, ...) {
+logLik.truncated_pareto_2p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 2,

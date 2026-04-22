@@ -15,16 +15,11 @@ fit_all <- function(data, criterion = c("AIC", "BIC")) {
     stop("Need at least 2 valid positive data points for fitting.")
   }
 
-  # List of distribution names available in the package
-  # These correspond to the {dist}_fit functions
-  distributions <- c(
-    "lognormal", "normal", "weibull", "pareto", "gb2", 
-    "dpln", "kappa4", "bradford", "fisk",
-    "johnsonsu", "johnsonsb", "johnsonsl"
-  )
+  # List of distribution names available in the package (sourced from definitions.R)
+  distributions <- names(.DIST_REGISTRY)
 
   fits <- list()
-  
+    
   for (dist in distributions) {
     fit_func_name <- paste0(dist, "_fit")
     

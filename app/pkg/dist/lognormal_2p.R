@@ -3,7 +3,7 @@
 # -------------------------------
 # Log-likelihood (pure)
 # -------------------------------
-lognormal_log_likelihood <- function(data, mu, sigma) {
+lognormal_2p_log_likelihood <- function(data, mu, sigma) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -18,7 +18,7 @@ lognormal_log_likelihood <- function(data, mu, sigma) {
 # -------------------------------
 # Fit standard lognormal (MLE)
 # -------------------------------
-lognormal_fit <- function(data) {
+lognormal_2p_fit <- function(data) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -31,17 +31,17 @@ lognormal_fit <- function(data) {
   mu_hat <- mean(log_data)
   sigma_hat <- sqrt(mean((log_data - mu_hat)^2))  # MLE (divide by n)
 
-  log_lik <- lognormal_log_likelihood(data, mu_hat, sigma_hat)
+  log_lik <- lognormal_2p_log_likelihood(data, mu_hat, sigma_hat)
 
   result <- list(
     mu = mu_hat,
     sigma = sigma_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "lognormal"
+    distribution = "lognormal_2p"
   )
 
-  class(result) <- "lognormal"
+  class(result) <- "lognormal_2p"
   result
 }
 
@@ -49,7 +49,7 @@ lognormal_fit <- function(data) {
 # -------------------------------
 # Truncated lognormal (MLE via optim)
 # -------------------------------
-lognormal_log_likelihood_truncated <- function(data, mu, sigma, lower, upper) {
+lognormal_2p_log_likelihood_truncated <- function(data, mu, sigma, lower, upper) {
   if (sigma <= 0 || lower < 0) return(-Inf)
 
   data <- data[data >= lower & data <= upper]
@@ -67,7 +67,7 @@ lognormal_log_likelihood_truncated <- function(data, mu, sigma, lower, upper) {
 }
 
 
-lognormal_fit_truncated <- function(data, lower = 0, upper = Inf) {
+lognormal_2p_fit_truncated <- function(data, lower = 0, upper = Inf) {
   data <- data[!is.na(data)]
 
   if (lower < 0) {
@@ -91,7 +91,7 @@ lognormal_fit_truncated <- function(data, lower = 0, upper = Inf) {
 
     if (sigma < 1e-8) return(Inf)
 
-    -lognormal_log_likelihood_truncated(data, mu, sigma, lower, upper)
+    -lognormal_2p_log_likelihood_truncated(data, mu, sigma, lower, upper)
   }
 
   fit <- optim(
@@ -104,7 +104,7 @@ lognormal_fit_truncated <- function(data, lower = 0, upper = Inf) {
   mu_hat <- fit$par[1]
   sigma_hat <- exp(fit$par[2])
 
-  log_lik <- lognormal_log_likelihood_truncated(
+  log_lik <- lognormal_2p_log_likelihood_truncated(
     data, mu_hat, sigma_hat, lower, upper
   )
 
@@ -116,10 +116,10 @@ lognormal_fit_truncated <- function(data, lower = 0, upper = Inf) {
     lower = lower,
     upper = upper,
     convergence = fit$convergence,
-    distribution = "truncated_lognormal"
+    distribution = "truncated_lognormal_2p"
   )
 
-  class(result) <- "truncated_lognormal"
+  class(result) <- "truncated_lognormal_2p"
   result
 }
 
@@ -127,7 +127,7 @@ lognormal_fit_truncated <- function(data, lower = 0, upper = Inf) {
 # -------------------------------
 # S3: logLik (enables AIC/BIC)
 # -------------------------------
-logLik.lognormal <- function(object, ...) {
+logLik.lognormal_2p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 2,
@@ -136,7 +136,7 @@ logLik.lognormal <- function(object, ...) {
   )
 }
 
-logLik.truncated_lognormal <- function(object, ...) {
+logLik.truncated_lognormal_2p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 2,
@@ -149,7 +149,7 @@ logLik.truncated_lognormal <- function(object, ...) {
 # -------------------------------
 # PDF
 # -------------------------------
-lognormal_pdf <- function(x, fit) {
+lognormal_2p_pdf <- function(x, fit) {
   out <- dlnorm(x, meanlog = fit$mu, sdlog = fit$sigma)
   out[x <= 0] <- 0
   out
@@ -159,7 +159,7 @@ lognormal_pdf <- function(x, fit) {
 # -------------------------------
 # CDF
 # -------------------------------
-lognormal_cdf <- function(x, fit) {
+lognormal_2p_cdf <- function(x, fit) {
   ifelse(x <= 0, 0, plnorm(x, meanlog = fit$mu, sdlog = fit$sigma))
 }
 
@@ -167,7 +167,7 @@ lognormal_cdf <- function(x, fit) {
 # -------------------------------
 # Quantile
 # -------------------------------
-lognormal_quantile <- function(p, fit) {
+lognormal_2p_quantile <- function(p, fit) {
   if (any(p < 0 | p > 1)) {
     stop("Probabilities must be in [0,1]")
   }
@@ -179,7 +179,7 @@ lognormal_quantile <- function(p, fit) {
 # -------------------------------
 # Random generation
 # -------------------------------
-lognormal_rand <- function(n, fit) {
+lognormal_2p_rand <- function(n, fit) {
   rlnorm(n, meanlog = fit$mu, sdlog = fit$sigma)
 }
 
@@ -187,7 +187,7 @@ lognormal_rand <- function(n, fit) {
 # -------------------------------
 # Mean
 # -------------------------------
-lognormal_mean <- function(fit) {
+lognormal_2p_mean <- function(fit) {
   exp(fit$mu + fit$sigma^2 / 2)
 }
 
@@ -195,7 +195,7 @@ lognormal_mean <- function(fit) {
 # -------------------------------
 # Standard deviation
 # -------------------------------
-lognormal_std <- function(fit) {
+lognormal_2p_std <- function(fit) {
   sqrt((exp(fit$sigma^2) - 1) * exp(2 * fit$mu + fit$sigma^2))
 }
 
@@ -203,7 +203,7 @@ lognormal_std <- function(fit) {
 # -------------------------------
 # Survival Function
 # -------------------------------
-lognormal_sf <- function(x, fit) {
+lognormal_2p_sf <- function(x, fit) {
   plnorm(x, meanlog = fit$mu, sdlog = fit$sigma, lower.tail = FALSE)
 }
 
@@ -211,7 +211,7 @@ lognormal_sf <- function(x, fit) {
 # -------------------------------
 # Inverse Survival Function
 # -------------------------------
-lognormal_isf <- function(p, fit) {
+lognormal_2p_isf <- function(p, fit) {
   qlnorm(p, meanlog = fit$mu, sdlog = fit$sigma, lower.tail = FALSE)
 }
 
@@ -219,7 +219,7 @@ lognormal_isf <- function(p, fit) {
 # -------------------------------
 # Log PDF
 # -------------------------------
-lognormal_logpdf <- function(x, fit) {
+lognormal_2p_logpdf <- function(x, fit) {
   dlnorm(x, meanlog = fit$mu, sdlog = fit$sigma, log = TRUE)
 }
 
@@ -227,7 +227,7 @@ lognormal_logpdf <- function(x, fit) {
 # -------------------------------
 # Log CDF
 # -------------------------------
-lognormal_logcdf <- function(x, fit) {
+lognormal_2p_logcdf <- function(x, fit) {
   plnorm(x, meanlog = fit$mu, sdlog = fit$sigma, log.p = TRUE)
 }
 
@@ -235,7 +235,7 @@ lognormal_logcdf <- function(x, fit) {
 # -------------------------------
 # Log SF
 # -------------------------------
-lognormal_logsf <- function(x, fit) {
+lognormal_2p_logsf <- function(x, fit) {
   plnorm(x, meanlog = fit$mu, sdlog = fit$sigma, lower.tail = FALSE, log.p = TRUE)
 }
 
@@ -243,7 +243,7 @@ lognormal_logsf <- function(x, fit) {
 # -------------------------------
 # Variance
 # -------------------------------
-lognormal_var <- function(fit) {
+lognormal_2p_var <- function(fit) {
   (exp(fit$sigma^2) - 1) * exp(2 * fit$mu + fit$sigma^2)
 }
 
@@ -251,7 +251,7 @@ lognormal_var <- function(fit) {
 # -------------------------------
 # Moment
 # -------------------------------
-lognormal_moment <- function(n, fit) {
+lognormal_2p_moment <- function(n, fit) {
   exp(n * fit$mu + (n^2 * fit$sigma^2) / 2)
 }
 
@@ -259,7 +259,7 @@ lognormal_moment <- function(n, fit) {
 # -------------------------------
 # Skewness
 # -------------------------------
-lognormal_skew <- function(fit) {
+lognormal_2p_skew <- function(fit) {
   (exp(fit$sigma^2) + 2) * sqrt(exp(fit$sigma^2) - 1)
 }
 
@@ -267,7 +267,7 @@ lognormal_skew <- function(fit) {
 # -------------------------------
 # Kurtosis
 # -------------------------------
-lognormal_kurtosis <- function(fit) {
+lognormal_2p_kurtosis <- function(fit) {
   exp(4 * fit$sigma^2) + 2 * exp(3 * fit$sigma^2) + 3 * exp(2 * fit$sigma^2) - 3
 }
 
@@ -275,7 +275,7 @@ lognormal_kurtosis <- function(fit) {
 # -------------------------------
 # Median
 # -------------------------------
-lognormal_median <- function(fit) {
+lognormal_2p_median <- function(fit) {
   exp(fit$mu)
 }
 
@@ -283,7 +283,7 @@ lognormal_median <- function(fit) {
 # -------------------------------
 # Interval
 # -------------------------------
-lognormal_interval <- function(level, fit) {
+lognormal_2p_interval <- function(level, fit) {
   alpha <- (1 - level) / 2
   qlnorm(c(alpha, 1 - alpha), meanlog = fit$mu, sdlog = fit$sigma)
 }
@@ -292,7 +292,7 @@ lognormal_interval <- function(level, fit) {
 # -------------------------------
 # Entropy
 # -------------------------------
-lognormal_entropy <- function(fit) {
+lognormal_2p_entropy <- function(fit) {
   log(fit$sigma * exp(fit$mu + 0.5) * sqrt(2 * pi))
 }
 
@@ -300,10 +300,10 @@ lognormal_entropy <- function(fit) {
 # -------------------------------
 # Expect
 # -------------------------------
-lognormal_expect <- function(func, fit, ...) {
+lognormal_2p_expect <- function(func, fit, ...) {
   # Numerical integration for arbitrary function
   integrand <- function(x) {
-    func(x, ...) * lognormal_pdf(x, fit)
+    func(x, ...) * lognormal_2p_pdf(x, fit)
   }
   
   # For lognormal, support is (0, Inf)

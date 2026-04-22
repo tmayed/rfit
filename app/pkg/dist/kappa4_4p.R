@@ -3,12 +3,12 @@
 # -------------------------------
 # Log-likelihood
 # -------------------------------
-kappa4_log_likelihood <- function(data, xi, alpha, k, h) {
+kappa4_4p_log_likelihood <- function(data, xi, alpha, k, h) {
   data <- data[!is.na(data)]
   
   if (alpha <= 0 || h <= 0) return(-Inf)
   
-  log_dens <- kappa4_logpdf(data, list(xi = xi, alpha = alpha, k = k, h = h))
+  log_dens <- kappa4_4p_logpdf(data, list(xi = xi, alpha = alpha, k = k, h = h))
   
   if (any(is.infinite(log_dens))) {
     # Fallback for extreme cases
@@ -22,7 +22,7 @@ kappa4_log_likelihood <- function(data, xi, alpha, k, h) {
 # -------------------------------
 # Fit (MLE via optim)
 # -------------------------------
-kappa4_fit <- function(data) {
+kappa4_4p_fit <- function(data) {
   data <- data[!is.na(data)]
   if (length(data) < 5) stop("Need more data points for 4-parameter fit")
   
@@ -39,7 +39,7 @@ kappa4_fit <- function(data) {
     
     if (abs(k) < 1e-6) k <- 1e-6
     
-    val <- -kappa4_log_likelihood(data, xi, alpha, k, h)
+    val <- -kappa4_4p_log_likelihood(data, xi, alpha, k, h)
     if (!is.finite(val)) return(1e10)
     val
   }
@@ -56,7 +56,7 @@ kappa4_fit <- function(data) {
   k_hat <- fit$par[3]
   h_hat <- exp(fit$par[4])
   
-  log_lik <- kappa4_log_likelihood(data, xi_hat, alpha_hat, k_hat, h_hat)
+  log_lik <- kappa4_4p_log_likelihood(data, xi_hat, alpha_hat, k_hat, h_hat)
   
   result <- list(
     xi = xi_hat,
@@ -66,21 +66,21 @@ kappa4_fit <- function(data) {
     log_likelihood = log_lik,
     n = length(data),
     convergence = fit$convergence,
-    distribution = "kappa4"
+    distribution = "kappa4_4p"
   )
   
-  class(result) <- "kappa4"
+  class(result) <- "kappa4_4p"
   result
 }
 
 # -------------------------------
 # Truncated Fit
 # -------------------------------
-kappa4_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
+kappa4_4p_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
   data <- data[!is.na(data) & data >= lower & data <= upper]
   if (length(data) < 5) stop("Need more data points within bounds")
   
-  init <- kappa4_fit(data)
+  init <- kappa4_4p_fit(data)
   
   neg_log_likelihood <- function(params) {
     xi <- params[1]
@@ -90,11 +90,11 @@ kappa4_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
     
     if (abs(k) < 1e-6) k <- 1e-6
     
-    ll_base <- kappa4_log_likelihood(data, xi, alpha, k, h)
+    ll_base <- kappa4_4p_log_likelihood(data, xi, alpha, k, h)
     
     fit_tmp <- list(xi=xi, alpha=alpha, k=k, h=h)
-    F_upper <- if (is.finite(upper)) kappa4_cdf(upper, fit_tmp) else 1
-    F_lower <- if (is.finite(lower)) kappa4_cdf(lower, fit_tmp) else 0
+    F_upper <- if (is.finite(upper)) kappa4_4p_cdf(upper, fit_tmp) else 1
+    F_lower <- if (is.finite(lower)) kappa4_4p_cdf(lower, fit_tmp) else 0
     
     diff <- F_upper - F_lower
     if (diff <= 1e-10) return(1e10)
@@ -119,20 +119,20 @@ kappa4_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
     lower = lower,
     upper = upper,
     convergence = fit$convergence,
-    distribution = "truncated_kappa4"
+    distribution = "truncated_kappa4_4p"
   )
-  class(result) <- "truncated_kappa4"
+  class(result) <- "truncated_kappa4_4p"
   result
 }
 
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-kappa4_pdf <- function(x, fit) {
-  exp(kappa4_logpdf(x, fit))
+kappa4_4p_pdf <- function(x, fit) {
+  exp(kappa4_4p_logpdf(x, fit))
 }
 
-kappa4_logpdf <- function(x, fit) {
+kappa4_4p_logpdf <- function(x, fit) {
   xi <- fit$xi
   alpha <- fit$alpha
   k <- fit$k
@@ -176,7 +176,7 @@ kappa4_logpdf <- function(x, fit) {
   out
 }
 
-kappa4_cdf <- function(x, fit) {
+kappa4_4p_cdf <- function(x, fit) {
   xi <- fit$xi
   alpha <- fit$alpha
   k <- fit$k
@@ -215,19 +215,19 @@ kappa4_cdf <- function(x, fit) {
   res
 }
 
-kappa4_logcdf <- function(x, fit) {
-  log(kappa4_cdf(x, fit))
+kappa4_4p_logcdf <- function(x, fit) {
+  log(kappa4_4p_cdf(x, fit))
 }
 
-kappa4_sf <- function(x, fit) {
-  1 - kappa4_cdf(x, fit)
+kappa4_4p_sf <- function(x, fit) {
+  1 - kappa4_4p_cdf(x, fit)
 }
 
-kappa4_logsf <- function(x, fit) {
-  log(kappa4_sf(x, fit))
+kappa4_4p_logsf <- function(x, fit) {
+  log(kappa4_4p_sf(x, fit))
 }
 
-kappa4_quantile <- function(p, fit) {
+kappa4_4p_quantile <- function(p, fit) {
   xi <- fit$xi
   alpha <- fit$alpha
   k <- fit$k
@@ -243,85 +243,85 @@ kappa4_quantile <- function(p, fit) {
   xi + (alpha / k) * (1 - ((1 - p^h) / h)^k)
 }
 
-kappa4_isf <- function(p, fit) {
-  kappa4_quantile(1 - p, fit)
+kappa4_4p_isf <- function(p, fit) {
+  kappa4_4p_quantile(1 - p, fit)
 }
 
-kappa4_rand <- function(n, fit) {
+kappa4_4p_rand <- function(n, fit) {
   u <- runif(n)
-  kappa4_quantile(u, fit)
+  kappa4_4p_quantile(u, fit)
 }
 
 # -------------------------------
 # Moments
 # -------------------------------
-kappa4_moment <- function(n, fit) {
+kappa4_4p_moment <- function(n, fit) {
   set.seed(42)
-  mean(kappa4_rand(100000, fit)^n)
+  mean(kappa4_4p_rand(100000, fit)^n)
 }
 
-kappa4_mean <- function(fit) {
+kappa4_4p_mean <- function(fit) {
   set.seed(42)
-  mean(kappa4_rand(100000, fit))
+  mean(kappa4_4p_rand(100000, fit))
 }
 
-kappa4_var <- function(fit) {
+kappa4_4p_var <- function(fit) {
   set.seed(42)
-  x <- kappa4_rand(100000, fit)
+  x <- kappa4_4p_rand(100000, fit)
   var(x)
 }
 
-kappa4_std <- function(fit) {
-  sqrt(kappa4_var(fit))
+kappa4_4p_std <- function(fit) {
+  sqrt(kappa4_4p_var(fit))
 }
 
-kappa4_skew <- function(fit) {
+kappa4_4p_skew <- function(fit) {
   set.seed(42)
-  x <- kappa4_rand(100000, fit)
+  x <- kappa4_4p_rand(100000, fit)
   m3 <- mean((x - mean(x))^3)
   m3 / (sd(x)^3)
 }
 
-kappa4_kurtosis <- function(fit) {
+kappa4_4p_kurtosis <- function(fit) {
   set.seed(42)
-  x <- kappa4_rand(100000, fit)
+  x <- kappa4_4p_rand(100000, fit)
   m4 <- mean((x - mean(x))^4)
   m4 / (var(x)^2)
 }
 
-kappa4_median <- function(fit) {
-  kappa4_quantile(0.5, fit)
+kappa4_4p_median <- function(fit) {
+  kappa4_4p_quantile(0.5, fit)
 }
 
 # -------------------------------
 # Interval / Entropy / Expect
 # -------------------------------
-kappa4_interval <- function(level, fit) {
+kappa4_4p_interval <- function(level, fit) {
   alpha_val <- (1 - level) / 2
-  kappa4_quantile(c(alpha_val, 1 - alpha_val), fit)
+  kappa4_4p_quantile(c(alpha_val, 1 - alpha_val), fit)
 }
 
-kappa4_entropy <- function(fit) {
+kappa4_4p_entropy <- function(fit) {
   integrand <- function(x) {
-    pdf_val <- kappa4_pdf(x, fit)
+    pdf_val <- kappa4_4p_pdf(x, fit)
     res <- numeric(length(x))
     pos <- !is.na(pdf_val) & pdf_val > 0
     res[pos] <- -pdf_val[pos] * log(pdf_val[pos])
     res
   }
   # Determine integration bounds from quantiles
-  lower <- kappa4_quantile(1e-7, fit)
-  upper <- kappa4_quantile(1 - 1e-7, fit)
+  lower <- kappa4_4p_quantile(1e-7, fit)
+  upper <- kappa4_4p_quantile(1 - 1e-7, fit)
   res <- integrate(integrand, lower = lower, upper = upper, rel.tol = 1e-6)
   res$value
 }
 
-kappa4_expect <- function(func, fit, ...) {
+kappa4_4p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * kappa4_pdf(x, fit)
+    func(x, ...) * kappa4_4p_pdf(x, fit)
   }
-  lower <- kappa4_quantile(1e-7, fit)
-  upper <- kappa4_quantile(1 - 1e-7, fit)
+  lower <- kappa4_4p_quantile(1e-7, fit)
+  upper <- kappa4_4p_quantile(1 - 1e-7, fit)
   res <- integrate(integrand, lower = lower, upper = upper, rel.tol = 1e-6)
   res$value
 }
@@ -329,10 +329,10 @@ kappa4_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3 logLik
 # -------------------------------
-logLik.kappa4 <- function(object, ...) {
+logLik.kappa4_4p <- function(object, ...) {
   structure(object$log_likelihood, df = 4, nobs = object$n, class = "logLik")
 }
 
-logLik.truncated_kappa4 <- function(object, ...) {
+logLik.truncated_kappa4_4p <- function(object, ...) {
   structure(object$log_likelihood, df = 4, nobs = object$n, class = "logLik")
 }

@@ -14,7 +14,16 @@ test:
 	(cd tests && Rscript test_fit_all_2m.R)
 	(cd tests && Rscript test_fit_all_3m.R)
 
-danish:
+poc_best_fit:
+	(cd poc && Rscript poc_best_fit.R)
+
+poc_best_fit_2m:
+	(cd poc && Rscript poc_best_fit_2m.R)
+
+poc_filter_dist:
+	(cd poc && Rscript poc_filter_dist.R)
+
+danish_fit:
 	(cd poc && Rscript danish_fit.R)
 
 danish_2m:
@@ -23,11 +32,12 @@ danish_2m:
 2m_random_mixture_fit:
 	(cd poc && Rscript 2m_random_mixture_fit.R)
 
-2m_best_fit:
-	(cd poc && Rscript 2m_best_fit.R)
 
 fit_2m:
 	(cd poc && Rscript fit_2m.R)
+
+fit_2m_w:
+	(cd poc && Rscript fit_2m_w.R)
 
 fit_2m_mean:
 	(cd poc && Rscript fit_2m_mean.R)

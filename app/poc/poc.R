@@ -36,7 +36,7 @@ cat("\n")
 
 # Fit lognormal distribution
 cat("=== Fitting Lognormal Distribution ===\n")
-fit_lognormal <- lognormal_fit(sample_data)
+fit_lognormal <- lognormal_2p_fit(sample_data)
 cat(sprintf("  mu: %.4f\n", fit_lognormal$mu))
 cat(sprintf("  sigma: %.4f\n", fit_lognormal$sigma))
 cat(sprintf("  log-likelihood: %.4f\n", fit_lognormal$log_likelihood))
@@ -44,7 +44,7 @@ cat("\n")
 
 # Fit pareto distribution
 cat("=== Fitting Pareto Distribution ===\n")
-fit_pareto <- pareto_fit(sample_data)
+fit_pareto <- pareto_2p_fit(sample_data)
 cat(sprintf("  shape: %.4f\n", fit_pareto$shape))
 cat(sprintf("  scale: %.4f\n", fit_pareto$scale))
 cat(sprintf("  log-likelihood: %.4f\n", fit_pareto$log_likelihood))

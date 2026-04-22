@@ -25,6 +25,12 @@ rfit is an R package for probability distribution fitting using maximum likeliho
 - Johnson SL (`pkg/dist/johnsonsl_3p.R`)
 - Johnson SU (`pkg/dist/johnsonsu_4p.R`)
 - Kappa 4 (`pkg/dist/kappa4_4p.R`)
+- Rayleigh (`pkg/dist/rayleigh_2p.R`)
+- Birnbaum-Saunders (`pkg/dist/birnbaumsaunders_3p.R`)
+- Beta-Rayleigh (`pkg/dist/betarayleigh_4p.R`)
+- Lévy (`pkg/dist/levy_2p.R`)
+- Nakagami (`pkg/dist/nakagami_2p.R`)
+- Generalized Inverse Gaussian (`pkg/dist/gig_3p.R`)
 - Mixture (`pkg/mixture.R`)
 
 ## Function Naming Convention
@@ -55,6 +61,35 @@ Each distribution implements the following functions using the pattern `{dist}_{
 | `{dist}_interval` | Compute central interval with given confidence level |
 | `{dist}_entropy` | Compute (differential) entropy of the distribution |
 | `{dist}_expect` | Compute expected value of a function under the distribution |
+
+## Definitions
+
+The `pkg/definitions.R` file serves as the central registry for all probability distributions in the package. It defines the metadata and transformation logic required for high-level orchestrators (like `fit_all`, `mixture_fit`) to handle distributions dynamically and consistently.
+
+### Distribution Registry (`.DIST_REGISTRY`)
+
+Each distribution is defined by an entry in the `.DIST_REGISTRY` list with the following fields:
+
+| Field | Description |
+|-------|-------------|
+| `np` | **Number of Parameters:** The count of parameters fitted by the model (e.g., 2 for Normal, 4 for dPLN). |
+| `domain` | **Support Bounds:** A numeric vector `c(lower, upper)` defining the theoretical range of the distribution. |
+| `f_0` | **Zero Density at Zero (Conditional):** A boolean indicating if the PDF $f(0) = 0$ is possible under certain parameter regimes (e.g., Weibull with shape > 1). |
+| `f_0_strict` | **Zero Density at Zero (Strict):** A boolean indicating if the PDF $f(0) = 0$ is guaranteed for *all* valid parameter regimes (e.g., Lognormal). If `FALSE`, a `#` comment must be provided next to the value explaining the condition where it is true (e.g., `# shape > 1`). |
+| `mean_def` | **Mean Existence:** A boolean indicating if the distribution's mean is well-defined for all valid parameter choices. If `FALSE`, a `#` comment must be provided next to the value explaining the condition where it is true (e.g., `# alpha > 1`) or if it never exists (e.g., `# no mean function`). |
+| `names` | **Parameter Names:** A character vector of the human-readable names for the distribution parameters (e.g., `c("mu", "sigma")`). |
+| `to_internal` | **Parameter Transformation:** A function that maps human-readable parameters (in a list) to the "unconstrained" internal scale used by the optimizer (typically log-transform for positive parameters). |
+| `from_internal` | **Inverse Transformation:** A function that maps the optimizer's unconstrained values back to the human-readable parameter list. |
+
+### Filtering Utility
+
+The `filter_distributions()` function allows for querying the registry based on statistical or architectural constraints.
+
+**Parameters:**
+- `np`: Filter by exact number of parameters.
+- `lb` / `ub`: Filter by lower or upper bounds of the support domain.
+- `f_0` / `f_0_strict`: Filter by density properties at zero.
+- `mean_def`: Filter for distributions with guaranteed finite means.
 
 ## File Structure
 

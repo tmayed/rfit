@@ -44,7 +44,7 @@ data <- sample(data, subset_size)
 cat(sprintf("Sample %d data points.\n", length(data)))
 
 # 3. Define mixture components
-dist_names <- c("lognormal", "dpln")
+dist_names <- c("lognormal_2p", "dpln_4p")
 cat(sprintf("\nFitting mixture WITH MEAN CONSTRAINT: %s + %s\n", dist_names[1], dist_names[2]))
 
 # 4. Fit the mixture with mean constraint

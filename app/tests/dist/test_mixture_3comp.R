@@ -8,12 +8,12 @@ cat("=== Testing 3-Component Mixture ===\n\n")
 # Generate 3-component data
 n <- 1500
 # 1/3 Lognormal, 1/3 Pareto, 1/3 Kappa4
-d1 <- lognormal_rand(n/3, list(mu = 1, sigma = 0.2))
-d2 <- pareto_rand(n/3, list(shape = 4, scale = 10))
-d3 <- kappa4_rand(n/3, list(xi = 20, alpha = 2, k = 0.1, h = 0.5))
+d1 <- lognormal_2p_rand(n/3, list(mu = 1, sigma = 0.2))
+d2 <- pareto_2p_rand(n/3, list(shape = 4, scale = 10))
+d3 <- kappa4_4p_rand(n/3, list(xi = 20, alpha = 2, k = 0.1, h = 0.5))
 data <- c(d1, d2, d3)
 
-dist_names <- c("lognormal", "pareto", "kappa4")
+dist_names <- c("lognormal_2p", "pareto_2p", "kappa4_4p")
 cat(sprintf("Fitting mixture of: %s...\n", paste(dist_names, collapse = ", ")))
 
 fit <- mixture_fit(data, dist_names)

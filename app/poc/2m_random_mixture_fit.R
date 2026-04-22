@@ -18,8 +18,8 @@ set.seed(Sys.time())
 
 # 1. Define a list of distributions for generation
 gen_dists <- c(
-  "lognormal", "normal", "weibull", "pareto", "gb2", "dpln",
-  "bradford", "fisk", "johnsonsb", "johnsonsl", "johnsonsu", "kappa4"
+  "lognormal_2p", "normal_2p", "weibull_2p", "pareto_2p", "gb2_4p", "dpln_4p",
+  "bradford_1p", "fisk_2p", "johnsonsb_4p", "johnsonsl_3p", "johnsonsu_4p", "kappa4_4p"
 )
 
 # 2. Randomly pick two distributions
@@ -35,31 +35,31 @@ cat(sprintf("Weights: %.2f (for %s), %.2f (for %s)\n", weights[1], picked[1], we
 # 4. Generate random parameters for each component
 # We'll use some reasonable ranges to ensure they are well-behaved
 gen_params <- function(name) {
-  if (name == "lognormal") {
-    list(mu = runif(1, 0, 2), sigma = runif(1, 0.2, 0.8), distribution = "lognormal")
-  } else if (name == "normal") {
-    list(mean = runif(1, 5, 15), sd = runif(1, 1, 3), distribution = "normal")
-  } else if (name == "weibull") {
-    list(shape = runif(1, 1, 3), scale = runif(1, 1, 10), distribution = "weibull")
-  } else if (name == "pareto") {
-    list(shape = runif(1, 2, 5), scale = runif(1, 1, 2), distribution = "pareto")
-  } else if (name == "fisk") {
-    list(scale = runif(1, 2, 8), shape = runif(1, 2, 5), distribution = "fisk")
-  } else if (name == "gb2") {
-    list(a = runif(1, 1, 3), b = runif(1, 5, 15), p = runif(1, 1, 3), q = runif(1, 1, 3), distribution = "gb2")
-  } else if (name == "dpln") {
-    list(alpha = runif(1, 1, 3), beta = runif(1, 1, 3), nu = runif(1, -1, 1), tau = runif(1, 0.5, 1.5), distribution = "dpln")
-  } else if (name == "bradford") {
+  if (name == "lognormal_2p") {
+    list(mu = runif(1, 0, 2), sigma = runif(1, 0.2, 0.8), distribution = "lognormal_2p")
+  } else if (name == "normal_2p") {
+    list(mean = runif(1, 5, 15), sd = runif(1, 1, 3), distribution = "normal_2p")
+  } else if (name == "weibull_2p") {
+    list(shape = runif(1, 1, 3), scale = runif(1, 1, 10), distribution = "weibull_2p")
+  } else if (name == "pareto_2p") {
+    list(shape = runif(1, 2, 5), scale = runif(1, 1, 2), distribution = "pareto_2p")
+  } else if (name == "fisk_2p") {
+    list(scale = runif(1, 2, 8), shape = runif(1, 2, 5), distribution = "fisk_2p")
+  } else if (name == "gb2_4p") {
+    list(a = runif(1, 1, 3), b = runif(1, 5, 15), p = runif(1, 1, 3), q = runif(1, 1, 3), distribution = "gb2_4p")
+  } else if (name == "dpln_4p") {
+    list(alpha = runif(1, 1, 3), beta = runif(1, 1, 3), nu = runif(1, -1, 1), tau = runif(1, 0.5, 1.5), distribution = "dpln_4p")
+  } else if (name == "bradford_1p") {
     upper <- runif(1, 10, 50)
-    list(shape = runif(1, 2, 10), lower = 0, upper = upper, distribution = "bradford")
-  } else if (name == "johnsonsb") {
-    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = 0, lambda = runif(1, 10, 50), distribution = "johnsonsb")
-  } else if (name == "johnsonsl") {
-    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = 0, distribution = "johnsonsl")
-  } else if (name == "johnsonsu") {
-    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = runif(1, 0, 10), lambda = runif(1, 1, 5), distribution = "johnsonsu")
-  } else if (name == "kappa4") {
-    list(xi = runif(1, 0, 5), alpha = runif(1, 5, 15), k = runif(1, -0.5, 0.5), h = runif(1, 0.1, 2), distribution = "kappa4")
+    list(shape = runif(1, 2, 10), lower = 0, upper = upper, distribution = "bradford_1p")
+  } else if (name == "johnsonsb_4p") {
+    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = 0, lambda = runif(1, 10, 50), distribution = "johnsonsb_4p")
+  } else if (name == "johnsonsl_3p") {
+    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = 0, distribution = "johnsonsl_3p")
+  } else if (name == "johnsonsu_4p") {
+    list(gamma = runif(1, -1, 1), delta = runif(1, 1, 3), xi = runif(1, 0, 10), lambda = runif(1, 1, 5), distribution = "johnsonsu_4p")
+  } else if (name == "kappa4_4p") {
+    list(xi = runif(1, 0, 5), alpha = runif(1, 5, 15), k = runif(1, -0.5, 0.5), h = runif(1, 0.1, 2), distribution = "kappa4_4p")
   }
 }
 

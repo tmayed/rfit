@@ -1,4 +1,4 @@
-# POC: Fit a hardcoded 2-component mixture to CSV data
+# POC: Fit a 2-component mixture with FIXED WEIGHTS (25% Lognormal, 75% dPLN)
 
 # Initialize renv if it exists
 if (file.exists("../renv/activate.R")) {
@@ -26,7 +26,7 @@ if (!file.exists(input_file)) {
 }
 
 input_name <- tools::file_path_sans_ext(basename(input_file))
-output_dir <- file.path("outputs", paste0(input_name, "_fit_2m"))
+output_dir <- file.path("outputs", paste0(input_name, "_fit_2m_w"))
 
 # Create or empty the output directory
 if (dir.exists(output_dir)) {
@@ -52,15 +52,19 @@ data <- sample(data, subset_size)
 
 cat(sprintf("Loaded %d data points.\n", length(data)))
 
-# 2. Define hardcoded mixture components
+# 2. Define mixture components and fixed weights
 dist_names <- c("lognormal_2p", "dpln_4p")
-cat(sprintf("Fitting mixture: %s + %s\n", dist_names[1], dist_names[2]))
+fixed_weights <- c(0.25, 0.75)
 
-# 3. Fit the mixture
-fit <- mixture_fit(data, dist_names)
+cat(sprintf("\nFitting mixture: %s (%.0f%%) + %s (%.0f%%) [FIXED WEIGHTS]\n", 
+            dist_names[1], fixed_weights[1]*100, 
+            dist_names[2], fixed_weights[2]*100))
+
+# 3. Fit the mixture with fixed weights
+fit <- mixture_fit(data, dist_names, fixed_weights = fixed_weights)
 
 # 4. Output results to terminal
-cat("\n=== Fit Results ===\n")
+cat("\n=== Fit Results (Fixed Weights) ===\n")
 cat(sprintf("Log-Likelihood: %.4f\n", fit$log_likelihood))
 cat(sprintf("AIC: %.4f\n", AIC(fit)))
 cat(sprintf("BIC: %.4f\n", BIC(fit)))
@@ -77,7 +81,7 @@ fit_results_df <- data.frame(
 for (i in 1:length(fit$weights)) {
   dist_name <- fit$dist_names[i]
   cat(sprintf("Component %d (%s):\n", i, dist_name))
-  cat(sprintf("  Weight: %.4f\n", fit$weights[i]))
+  cat(sprintf("  Weight: %.4f (Fixed)\n", fit$weights[i]))
   
   fit_results_df <- rbind(fit_results_df, data.frame(
     distribution = dist_name, param = "weight", value = fit$weights[i]
@@ -125,9 +129,11 @@ plot_cdf_comparison(
   dist_cdf = mixture_cdf,
   output_dir = output_dir,
   output_file = "cdf",
-  title = sprintf("2-Component Mixture Fit (Traffic Data: %s+%s)", 
+  title = sprintf("Fixed-Weight Mixture Fit (25%% %s + 75%% %s)", 
                   dist_names[1], dist_names[2]),
   x_label = "Traffic",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean
 )
 
 plot_cdf_comparison(
@@ -136,9 +142,11 @@ plot_cdf_comparison(
   dist_cdf = mixture_cdf,
   output_dir = output_dir,
   output_file = "cdf_log",
-  title = sprintf("2-Component Mixture Fit (Log Scale) (Traffic Data: %s+%s)", 
+  title = sprintf("Fixed-Weight Mixture Fit (Log Scale) (25%% %s + 75%% %s)", 
                   dist_names[1], dist_names[2]),
   x_label = "Traffic",
+  empirical_mean = empirical_mean,
+  fitted_mean = mixture_theoretical_mean,
   log_x = TRUE
 )
 
@@ -148,7 +156,7 @@ plot_pdf_comparison(
   dist_pdf = mixture_pdf,
   output_dir = output_dir,
   output_file = "pdf",
-  title = sprintf("2-Component Mixture PDF Fit (Traffic Data: %s+%s)", 
+  title = sprintf("Fixed-Weight Mixture PDF Fit (25%% %s + 75%% %s)", 
                   dist_names[1], dist_names[2]),
   x_label = "Traffic",
   empirical_mean = empirical_mean,

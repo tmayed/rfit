@@ -5,7 +5,7 @@
 # -------------------------------
 # Log-likelihood
 # -------------------------------
-bradford_log_likelihood <- function(data, shape, lower, upper) {
+bradford_1p_log_likelihood <- function(data, shape, lower, upper) {
   data <- data[!is.na(data)]
   data <- data[data >= lower & data <= upper]
   
@@ -14,7 +14,7 @@ bradford_log_likelihood <- function(data, shape, lower, upper) {
   }
   
   fit <- list(shape = shape, lower = lower, upper = upper)
-  log_dens <- bradford_logpdf(data, fit)
+  log_dens <- bradford_1p_logpdf(data, fit)
   
   sum(log_dens)
 }
@@ -22,7 +22,7 @@ bradford_log_likelihood <- function(data, shape, lower, upper) {
 # -------------------------------
 # Fit (MLE via optim)
 # -------------------------------
-bradford_fit <- function(data) {
+bradford_1p_fit <- function(data) {
   data <- data[!is.na(data)]
   if (length(data) < 1) stop("Need at least 1 valid data point")
   
@@ -41,7 +41,7 @@ bradford_fit <- function(data) {
   neg_log_likelihood <- function(params) {
     shape <- exp(params[1])
     # We fix lower and upper as min/max for standard MLE of support
-    -bradford_log_likelihood(data, shape, lower_hat, upper_hat)
+    -bradford_1p_log_likelihood(data, shape, lower_hat, upper_hat)
   }
   
   fit_opt <- optim(
@@ -52,7 +52,7 @@ bradford_fit <- function(data) {
   
   shape_hat <- exp(fit_opt$par[1])
   
-  log_lik <- bradford_log_likelihood(data, shape_hat, lower_hat, upper_hat)
+  log_lik <- bradford_1p_log_likelihood(data, shape_hat, lower_hat, upper_hat)
   
   result <- list(
     shape = shape_hat,
@@ -60,37 +60,37 @@ bradford_fit <- function(data) {
     upper = upper_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "bradford"
+    distribution = "bradford_1p"
   )
   
-  class(result) <- "bradford"
+  class(result) <- "bradford_1p"
   result
 }
 
 # -------------------------------
 # Truncated Fit
 # -------------------------------
-bradford_fit_truncated <- function(data, lower_bound = -Inf, upper_bound = Inf) {
+bradford_1p_fit_truncated <- function(data, lower_bound = -Inf, upper_bound = Inf) {
   # Bradford is already on a bounded interval [lower, upper].
   # Truncating it further just restricts that interval.
   data <- data[!is.na(data) & data >= lower_bound & data <= upper_bound]
   if (length(data) < 1) stop("Need data within truncation bounds")
   
   # Standard fit on the truncated data
-  res <- bradford_fit(data)
-  res$distribution <- "truncated_bradford"
-  class(res) <- "truncated_bradford"
+  res <- bradford_1p_fit(data)
+  res$distribution <- "truncated_bradford_1p"
+  class(res) <- "truncated_bradford_1p"
   res
 }
 
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-bradford_pdf <- function(x, fit) {
-  exp(bradford_logpdf(x, fit))
+bradford_1p_pdf <- function(x, fit) {
+  exp(bradford_1p_logpdf(x, fit))
 }
 
-bradford_logpdf <- function(x, fit) {
+bradford_1p_logpdf <- function(x, fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -106,7 +106,7 @@ bradford_logpdf <- function(x, fit) {
   out
 }
 
-bradford_cdf <- function(x, fit) {
+bradford_1p_cdf <- function(x, fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -124,19 +124,19 @@ bradford_cdf <- function(x, fit) {
   res
 }
 
-bradford_logcdf <- function(x, fit) {
-  log(bradford_cdf(x, fit))
+bradford_1p_logcdf <- function(x, fit) {
+  log(bradford_1p_cdf(x, fit))
 }
 
-bradford_sf <- function(x, fit) {
-  1 - bradford_cdf(x, fit)
+bradford_1p_sf <- function(x, fit) {
+  1 - bradford_1p_cdf(x, fit)
 }
 
-bradford_logsf <- function(x, fit) {
-  log(bradford_sf(x, fit))
+bradford_1p_logsf <- function(x, fit) {
+  log(bradford_1p_sf(x, fit))
 }
 
-bradford_quantile <- function(p, fit) {
+bradford_1p_quantile <- function(p, fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -147,24 +147,24 @@ bradford_quantile <- function(p, fit) {
   a + (L / c) * ((1 + c)^p - 1)
 }
 
-bradford_isf <- function(p, fit) {
-  bradford_quantile(1 - p, fit)
+bradford_1p_isf <- function(p, fit) {
+  bradford_1p_quantile(1 - p, fit)
 }
 
-bradford_rand <- function(n, fit) {
+bradford_1p_rand <- function(n, fit) {
   u <- runif(n)
-  bradford_quantile(u, fit)
+  bradford_1p_quantile(u, fit)
 }
 
 # -------------------------------
 # Moments
 # -------------------------------
-bradford_moment <- function(n, fit) {
+bradford_1p_moment <- function(n, fit) {
   # Use numerical integration for general moments
-  bradford_expect(function(x) x^n, fit)
+  bradford_1p_expect(function(x) x^n, fit)
 }
 
-bradford_mean <- function(fit) {
+bradford_1p_mean <- function(fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -176,7 +176,7 @@ bradford_mean <- function(fit) {
   a + L * m_std
 }
 
-bradford_var <- function(fit) {
+bradford_1p_var <- function(fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -184,42 +184,42 @@ bradford_var <- function(fit) {
   
   # Standard variance on [0,1]
   # E[X^2] = (c * (c-2) + 2*log(1+c)) / (2 * c^2 * log(1+c)) --- No, let's re-derive or integrate
-  m2_std <- bradford_moment(2, list(shape=c, lower=0, upper=1))
+  m2_std <- bradford_1p_moment(2, list(shape=c, lower=0, upper=1))
   m1_std <- (c - log(1 + c)) / (c * log(1 + c))
   v_std <- m2_std - m1_std^2
   
   L^2 * v_std
 }
 
-bradford_std <- function(fit) {
-  sqrt(bradford_var(fit))
+bradford_1p_std <- function(fit) {
+  sqrt(bradford_1p_var(fit))
 }
 
-bradford_skew <- function(fit) {
-  x <- bradford_rand(100000, fit)
+bradford_1p_skew <- function(fit) {
+  x <- bradford_1p_rand(100000, fit)
   m3 <- mean((x - mean(x))^3)
   m3 / (sd(x)^3)
 }
 
-bradford_kurtosis <- function(fit) {
-  x <- bradford_rand(100000, fit)
+bradford_1p_kurtosis <- function(fit) {
+  x <- bradford_1p_rand(100000, fit)
   m4 <- mean((x - mean(x))^4)
   m4 / (var(x)^2)
 }
 
-bradford_median <- function(fit) {
-  bradford_quantile(0.5, fit)
+bradford_1p_median <- function(fit) {
+  bradford_1p_quantile(0.5, fit)
 }
 
 # -------------------------------
 # Interval / Entropy / Expect
 # -------------------------------
-bradford_interval <- function(level, fit) {
+bradford_1p_interval <- function(level, fit) {
   alpha <- (1 - level) / 2
-  bradford_quantile(c(alpha, 1 - alpha), fit)
+  bradford_1p_quantile(c(alpha, 1 - alpha), fit)
 }
 
-bradford_entropy <- function(fit) {
+bradford_1p_entropy <- function(fit) {
   c <- fit$shape
   a <- fit$lower
   b <- fit$upper
@@ -227,15 +227,15 @@ bradford_entropy <- function(fit) {
   # Entropy of standard Bradford(c) is log(log(1+c)/c) + log(1+c)/2 + 1/2? No.
   # Let's use numerical integration for safety.
   integrand <- function(x) {
-    p <- bradford_pdf(x, fit)
+    p <- bradford_1p_pdf(x, fit)
     ifelse(p > 0, -p * log(p), 0)
   }
   integrate(integrand, lower = a, upper = b)$value
 }
 
-bradford_expect <- function(func, fit, ...) {
+bradford_1p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * bradford_pdf(x, fit)
+    func(x, ...) * bradford_1p_pdf(x, fit)
   }
   integrate(integrand, lower = fit$lower, upper = fit$upper)$value
 }
@@ -243,10 +243,10 @@ bradford_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3: logLik
 # -------------------------------
-logLik.bradford <- function(object, ...) {
+logLik.bradford_1p <- function(object, ...) {
   structure(object$log_likelihood, df = 1, nobs = object$n, class = "logLik")
 }
 
-logLik.truncated_bradford <- function(object, ...) {
+logLik.truncated_bradford_1p <- function(object, ...) {
   structure(object$log_likelihood, df = 1, nobs = object$n, class = "logLik")
 }

@@ -6,7 +6,7 @@
 # -------------------------------
 # Log-likelihood
 # -------------------------------
-johnsonsb_log_likelihood <- function(data, gamma, delta, xi, lambda) {
+johnsonsb_4p_log_likelihood <- function(data, gamma, delta, xi, lambda) {
   data <- data[!is.na(data)]
   if (delta <= 0 || lambda <= 0) return(-Inf)
   
@@ -14,7 +14,7 @@ johnsonsb_log_likelihood <- function(data, gamma, delta, xi, lambda) {
   if (any(data <= xi | data >= xi + lambda)) return(-Inf)
   
   fit <- list(gamma = gamma, delta = delta, xi = xi, lambda = lambda)
-  log_dens <- johnsonsb_logpdf(data, fit)
+  log_dens <- johnsonsb_4p_logpdf(data, fit)
   
   sum(log_dens)
 }
@@ -22,7 +22,7 @@ johnsonsb_log_likelihood <- function(data, gamma, delta, xi, lambda) {
 # -------------------------------
 # Fit (MLE via optim)
 # -------------------------------
-johnsonsb_fit <- function(data) {
+johnsonsb_4p_fit <- function(data) {
   data <- data[!is.na(data)]
   if (length(data) < 4) stop("Need at least 4 valid data points")
   
@@ -43,7 +43,7 @@ johnsonsb_fit <- function(data) {
     # Constraints
     if (any(data <= xi | data >= xi + lambda)) return(1e10)
     
-    -johnsonsb_log_likelihood(data, gamma, delta, xi, lambda)
+    -johnsonsb_4p_log_likelihood(data, gamma, delta, xi, lambda)
   }
   
   fit_opt <- optim(
@@ -58,7 +58,7 @@ johnsonsb_fit <- function(data) {
   xi_hat     <- fit_opt$par[3]
   lambda_hat <- exp(fit_opt$par[4])
   
-  log_lik <- johnsonsb_log_likelihood(data, gamma_hat, delta_hat, xi_hat, lambda_hat)
+  log_lik <- johnsonsb_4p_log_likelihood(data, gamma_hat, delta_hat, xi_hat, lambda_hat)
   
   result <- list(
     gamma = gamma_hat,
@@ -67,36 +67,36 @@ johnsonsb_fit <- function(data) {
     lambda = lambda_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "johnsonsb"
+    distribution = "johnsonsb_4p"
   )
   
-  class(result) <- "johnsonsb"
+  class(result) <- "johnsonsb_4p"
   result
 }
 
 # -------------------------------
 # Truncated Fit
 # -------------------------------
-johnsonsb_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
+johnsonsb_4p_fit_truncated <- function(data, lower = -Inf, upper = Inf) {
   # Johnson SB is already on a bounded interval [xi, xi + lambda].
   data <- data[!is.na(data) & data >= lower & data <= upper]
   if (length(data) < 4) stop("Need at least 4 data points within bounds")
   
   # Standard fit on the restricted data
-  res <- johnsonsb_fit(data)
-  res$distribution <- "truncated_johnsonsb"
-  class(res) <- "truncated_johnsonsb"
+  res <- johnsonsb_4p_fit(data)
+  res$distribution <- "truncated_johnsonsb_4p"
+  class(res) <- "truncated_johnsonsb_4p"
   res
 }
 
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-johnsonsb_pdf <- function(x, fit) {
-  exp(johnsonsb_logpdf(x, fit))
+johnsonsb_4p_pdf <- function(x, fit) {
+  exp(johnsonsb_4p_logpdf(x, fit))
 }
 
-johnsonsb_logpdf <- function(x, fit) {
+johnsonsb_4p_logpdf <- function(x, fit) {
   gamma <- fit$gamma
   delta <- fit$delta
   xi <- fit$xi
@@ -114,7 +114,7 @@ johnsonsb_logpdf <- function(x, fit) {
   out
 }
 
-johnsonsb_cdf <- function(x, fit) {
+johnsonsb_4p_cdf <- function(x, fit) {
   gamma <- fit$gamma
   delta <- fit$delta
   xi <- fit$xi
@@ -134,19 +134,19 @@ johnsonsb_cdf <- function(x, fit) {
   res
 }
 
-johnsonsb_logcdf <- function(x, fit) {
-  log(johnsonsb_cdf(x, fit))
+johnsonsb_4p_logcdf <- function(x, fit) {
+  log(johnsonsb_4p_cdf(x, fit))
 }
 
-johnsonsb_sf <- function(x, fit) {
-  1 - johnsonsb_cdf(x, fit)
+johnsonsb_4p_sf <- function(x, fit) {
+  1 - johnsonsb_4p_cdf(x, fit)
 }
 
-johnsonsb_logsf <- function(x, fit) {
-  log(johnsonsb_sf(x, fit))
+johnsonsb_4p_logsf <- function(x, fit) {
+  log(johnsonsb_4p_sf(x, fit))
 }
 
-johnsonsb_quantile <- function(p, fit) {
+johnsonsb_4p_quantile <- function(p, fit) {
   gamma <- fit$gamma
   delta <- fit$delta
   xi <- fit$xi
@@ -163,74 +163,74 @@ johnsonsb_quantile <- function(p, fit) {
   xi + lambda * u
 }
 
-johnsonsb_isf <- function(p, fit) {
-  johnsonsb_quantile(1 - p, fit)
+johnsonsb_4p_isf <- function(p, fit) {
+  johnsonsb_4p_quantile(1 - p, fit)
 }
 
-johnsonsb_rand <- function(n, fit) {
+johnsonsb_4p_rand <- function(n, fit) {
   u_norm <- runif(n)
-  johnsonsb_quantile(u_norm, fit)
+  johnsonsb_4p_quantile(u_norm, fit)
 }
 
 # -------------------------------
 # Moments
 # -------------------------------
-johnsonsb_moment <- function(n, fit) {
-  johnsonsb_expect(function(x) x^n, fit)
+johnsonsb_4p_moment <- function(n, fit) {
+  johnsonsb_4p_expect(function(x) x^n, fit)
 }
 
-johnsonsb_mean <- function(fit) {
-  johnsonsb_expect(function(x) x, fit)
+johnsonsb_4p_mean <- function(fit) {
+  johnsonsb_4p_expect(function(x) x, fit)
 }
 
-johnsonsb_var <- function(fit) {
-  m2 <- johnsonsb_moment(2, fit)
-  m1 <- johnsonsb_mean(fit)
+johnsonsb_4p_var <- function(fit) {
+  m2 <- johnsonsb_4p_moment(2, fit)
+  m1 <- johnsonsb_4p_mean(fit)
   m2 - m1^2
 }
 
-johnsonsb_std <- function(fit) {
-  sqrt(johnsonsb_var(fit))
+johnsonsb_4p_std <- function(fit) {
+  sqrt(johnsonsb_4p_var(fit))
 }
 
-johnsonsb_skew <- function(fit) {
+johnsonsb_4p_skew <- function(fit) {
   set.seed(42)
-  x <- johnsonsb_rand(100000, fit)
+  x <- johnsonsb_4p_rand(100000, fit)
   m3 <- mean((x - mean(x))^3)
   m3 / (sd(x)^3)
 }
 
-johnsonsb_kurtosis <- function(fit) {
+johnsonsb_4p_kurtosis <- function(fit) {
   set.seed(42)
-  x <- johnsonsb_rand(100000, fit)
+  x <- johnsonsb_4p_rand(100000, fit)
   m4 <- mean((x - mean(x))^4)
   m4 / (var(x)^2)
 }
 
-johnsonsb_median <- function(fit) {
-  johnsonsb_quantile(0.5, fit)
+johnsonsb_4p_median <- function(fit) {
+  johnsonsb_4p_quantile(0.5, fit)
 }
 
 # -------------------------------
 # Interval / Entropy / Expect
 # -------------------------------
-johnsonsb_interval <- function(level, fit) {
+johnsonsb_4p_interval <- function(level, fit) {
   alpha <- (1 - level) / 2
-  johnsonsb_quantile(c(alpha, 1 - alpha), fit)
+  johnsonsb_4p_quantile(c(alpha, 1 - alpha), fit)
 }
 
-johnsonsb_entropy <- function(fit) {
+johnsonsb_4p_entropy <- function(fit) {
   integrand <- function(x) {
-    p <- johnsonsb_pdf(x, fit)
+    p <- johnsonsb_4p_pdf(x, fit)
     ifelse(p > 0, -p * log(p), 0)
   }
   # Use exact support for integration
   integrate(integrand, lower = fit$xi, upper = fit$xi + fit$lambda)$value
 }
 
-johnsonsb_expect <- function(func, fit, ...) {
+johnsonsb_4p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * johnsonsb_pdf(x, fit)
+    func(x, ...) * johnsonsb_4p_pdf(x, fit)
   }
   integrate(integrand, lower = fit$xi, upper = fit$xi + fit$lambda)$value
 }
@@ -238,10 +238,10 @@ johnsonsb_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3: logLik
 # -------------------------------
-logLik.johnsonsb <- function(object, ...) {
+logLik.johnsonsb_4p <- function(object, ...) {
   structure(object$log_likelihood, df = 4, nobs = object$n, class = "logLik")
 }
 
-logLik.truncated_johnsonsb <- function(object, ...) {
+logLik.truncated_johnsonsb_4p <- function(object, ...) {
   structure(object$log_likelihood, df = 4, nobs = object$n, class = "logLik")
 }

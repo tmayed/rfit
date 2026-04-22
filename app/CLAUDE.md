@@ -25,6 +25,12 @@ rfit is an R package for probability distribution fitting using maximum likeliho
 - Johnson SL (`pkg/dist/johnsonsl_3p.R`)
 - Johnson SU (`pkg/dist/johnsonsu_4p.R`)
 - Kappa 4 (`pkg/dist/kappa4_4p.R`)
+- Rayleigh (`pkg/dist/rayleigh_2p.R`)
+- Birnbaum-Saunders (`pkg/dist/birnbaumsaunders_3p.R`)
+- Beta-Rayleigh (`pkg/dist/betarayleigh_4p.R`)
+- Lévy (`pkg/dist/levy_2p.R`)
+- Nakagami (`pkg/dist/nakagami_2p.R`)
+- Generalized Inverse Gaussian (`pkg/dist/gig_3p.R`)
 - Mixture (`pkg/mixture.R`)
 
 ## Function Naming Convention

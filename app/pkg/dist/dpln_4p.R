@@ -4,14 +4,14 @@
 # -------------------------------
 # Helper: A(theta, nu, tau)
 # -------------------------------
-.dpln_A <- function(theta, nu, tau) {
+.dpln_4p_A <- function(theta, nu, tau) {
   exp(theta * nu + (theta^2 * tau^2) / 2)
 }
 
 # -------------------------------
 # Log-likelihood (pure)
 # -------------------------------
-dpln_log_likelihood <- function(data, alpha, beta, nu, tau) {
+dpln_4p_log_likelihood <- function(data, alpha, beta, nu, tau) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -19,7 +19,7 @@ dpln_log_likelihood <- function(data, alpha, beta, nu, tau) {
     return(-Inf)
   }
 
-  log_dens <- dpln_logpdf(data, list(alpha = alpha, beta = beta, nu = nu, tau = tau))
+  log_dens <- dpln_4p_logpdf(data, list(alpha = alpha, beta = beta, nu = nu, tau = tau))
   
   if (any(is.infinite(log_dens))) {
     # Fallback for extreme cases
@@ -34,7 +34,7 @@ dpln_log_likelihood <- function(data, alpha, beta, nu, tau) {
 # -------------------------------
 # Fit dPLN (MLE via optim)
 # -------------------------------
-dpln_fit <- function(data) {
+dpln_4p_fit <- function(data) {
   data <- data[!is.na(data)]
   data <- data[data > 0]
 
@@ -57,7 +57,7 @@ dpln_fit <- function(data) {
 
     if (is.na(tau) || tau < 1e-8 || alpha < 1e-8 || beta < 1e-8) return(1e20)
 
-    ll <- dpln_log_likelihood(data, alpha, beta, nu, tau)
+    ll <- dpln_4p_log_likelihood(data, alpha, beta, nu, tau)
     if (!is.finite(ll)) return(1e20)
     -ll
   }
@@ -76,7 +76,7 @@ dpln_fit <- function(data) {
   nu_hat    <- fit$par[3]
   tau_hat   <- exp(fit$par[4])
 
-  log_lik <- dpln_log_likelihood(data, alpha_hat, beta_hat, nu_hat, tau_hat)
+  log_lik <- dpln_4p_log_likelihood(data, alpha_hat, beta_hat, nu_hat, tau_hat)
 
   result <- list(
     alpha = alpha_hat,
@@ -85,10 +85,10 @@ dpln_fit <- function(data) {
     tau = tau_hat,
     log_likelihood = log_lik,
     n = length(data),
-    distribution = "dpln"
+    distribution = "dpln_4p"
   )
 
-  class(result) <- "dpln"
+  class(result) <- "dpln_4p"
   result
 }
 
@@ -96,17 +96,17 @@ dpln_fit <- function(data) {
 # -------------------------------
 # Truncated dPLN (MLE via optim)
 # -------------------------------
-dpln_log_likelihood_truncated <- function(data, alpha, beta, nu, tau, lower, upper) {
+dpln_4p_log_likelihood_truncated <- function(data, alpha, beta, nu, tau, lower, upper) {
   if (alpha <= 0 || beta <= 0 || tau <= 0 || lower < 0) return(-Inf)
 
   data <- data[data >= lower & data <= upper]
   if (length(data) == 0) return(-Inf)
 
   fit_tmp <- list(alpha = alpha, beta = beta, nu = nu, tau = tau)
-  ll <- sum(dpln_logpdf(data, fit_tmp))
+  ll <- sum(dpln_4p_logpdf(data, fit_tmp))
 
-  p_upper <- dpln_cdf(upper, fit_tmp)
-  p_lower <- dpln_cdf(lower, fit_tmp)
+  p_upper <- dpln_4p_cdf(upper, fit_tmp)
+  p_lower <- dpln_4p_cdf(lower, fit_tmp)
 
   diff <- p_upper - p_lower
   if (diff <= 1e-12) return(-Inf)
@@ -115,7 +115,7 @@ dpln_log_likelihood_truncated <- function(data, alpha, beta, nu, tau, lower, upp
 }
 
 
-dpln_fit_truncated <- function(data, lower = 0, upper = Inf) {
+dpln_4p_fit_truncated <- function(data, lower = 0, upper = Inf) {
   data <- data[!is.na(data)]
   data <- data[data >= lower & data <= upper]
 
@@ -137,7 +137,7 @@ dpln_fit_truncated <- function(data, lower = 0, upper = Inf) {
 
     if (tau < 1e-8 || alpha < 1e-8 || beta < 1e-8) return(Inf)
 
-    -dpln_log_likelihood_truncated(data, alpha, beta, nu, tau, lower, upper)
+    -dpln_4p_log_likelihood_truncated(data, alpha, beta, nu, tau, lower, upper)
   }
 
   fit <- optim(
@@ -152,7 +152,7 @@ dpln_fit_truncated <- function(data, lower = 0, upper = Inf) {
   nu_hat    <- fit$par[3]
   tau_hat   <- exp(fit$par[4])
 
-  log_lik <- dpln_log_likelihood_truncated(
+  log_lik <- dpln_4p_log_likelihood_truncated(
     data, alpha_hat, beta_hat, nu_hat, tau_hat, lower, upper
   )
 
@@ -166,10 +166,10 @@ dpln_fit_truncated <- function(data, lower = 0, upper = Inf) {
     lower = lower,
     upper = upper,
     convergence = fit$convergence,
-    distribution = "truncated_dpln"
+    distribution = "truncated_dpln_4p"
   )
 
-  class(result) <- "truncated_dpln"
+  class(result) <- "truncated_dpln_4p"
   result
 }
 
@@ -177,11 +177,11 @@ dpln_fit_truncated <- function(data, lower = 0, upper = Inf) {
 # -------------------------------
 # PDF / CDF / Quantile / Rand
 # -------------------------------
-dpln_pdf <- function(x, fit) {
-  exp(dpln_logpdf(x, fit))
+dpln_4p_pdf <- function(x, fit) {
+  exp(dpln_4p_logpdf(x, fit))
 }
 
-dpln_logpdf <- function(x, fit) {
+dpln_4p_logpdf <- function(x, fit) {
   alpha <- fit$alpha
   beta <- fit$beta
   nu <- fit$nu
@@ -206,7 +206,7 @@ dpln_logpdf <- function(x, fit) {
   out
 }
 
-dpln_cdf <- function(x, fit) {
+dpln_4p_cdf <- function(x, fit) {
   alpha <- fit$alpha
   beta <- fit$beta
   nu <- fit$nu
@@ -247,19 +247,19 @@ dpln_cdf <- function(x, fit) {
   out
 }
 
-dpln_logcdf <- function(x, fit) {
-  log(dpln_cdf(x, fit))
+dpln_4p_logcdf <- function(x, fit) {
+  log(dpln_4p_cdf(x, fit))
 }
 
-dpln_sf <- function(x, fit) {
-  1 - dpln_cdf(x, fit)
+dpln_4p_sf <- function(x, fit) {
+  1 - dpln_4p_cdf(x, fit)
 }
 
-dpln_logsf <- function(x, fit) {
-  log(dpln_sf(x, fit))
+dpln_4p_logsf <- function(x, fit) {
+  log(dpln_4p_sf(x, fit))
 }
 
-dpln_quantile <- function(p, fit) {
+dpln_4p_quantile <- function(p, fit) {
   if (any(p < 0 | p > 1)) {
     stop("Probabilities must be in [0,1]")
   }
@@ -275,33 +275,33 @@ dpln_quantile <- function(p, fit) {
     upper_bound <- qlnorm(min(1-1e-10, 1 - (1-prob)/10), meanlog = fit$nu, sdlog = fit$tau)
     
     # Expand bounds if necessary
-    while(dpln_cdf(lower_bound, fit) > prob && lower_bound > 1e-20) {
+    while(dpln_4p_cdf(lower_bound, fit) > prob && lower_bound > 1e-20) {
       lower_bound <- lower_bound / 10
     }
-    while(dpln_cdf(upper_bound, fit) < prob && upper_bound < 1e20) {
+    while(dpln_4p_cdf(upper_bound, fit) < prob && upper_bound < 1e20) {
       upper_bound <- upper_bound * 10
     }
 
     tryCatch({
-      uniroot(function(x) dpln_cdf(x, fit) - prob, 
+      uniroot(function(x) dpln_4p_cdf(x, fit) - prob, 
               lower = lower_bound, 
               upper = upper_bound, 
               tol = 1e-8)$root
     }, error = function(e) {
       # Fallback to optim if uniroot fails
       optim(par = fit$nu, 
-            fn = function(lx) (dpln_cdf(exp(lx), fit) - prob)^2,
+            fn = function(lx) (dpln_4p_cdf(exp(lx), fit) - prob)^2,
             method = "BFGS")$par |> exp()
     })
   })
   res
 }
 
-dpln_isf <- function(p, fit) {
-  dpln_quantile(1 - p, fit)
+dpln_4p_isf <- function(p, fit) {
+  dpln_4p_quantile(1 - p, fit)
 }
 
-dpln_rand <- function(n, fit) {
+dpln_4p_rand <- function(n, fit) {
   # X = exp(nu + tau * Z + E1 - E2)
   # where Z ~ N(0,1), E1 ~ Exp(alpha), E2 ~ Exp(beta)
   z  <- rnorm(n, mean = 0, sd = 1)
@@ -315,76 +315,76 @@ dpln_rand <- function(n, fit) {
 # -------------------------------
 # Moments
 # -------------------------------
-dpln_moment <- function(n, fit) {
+dpln_4p_moment <- function(n, fit) {
   if (fit$alpha <= n) return(Inf)
   exp(n * fit$nu + (n^2 * fit$tau^2) / 2) * (fit$alpha / (fit$alpha - n)) * (fit$beta / (fit$beta + n))
 }
 
-dpln_mean <- function(fit) {
-  dpln_moment(1, fit)
+dpln_4p_mean <- function(fit) {
+  dpln_4p_moment(1, fit)
 }
 
-dpln_var <- function(fit) {
+dpln_4p_var <- function(fit) {
   if (fit$alpha <= 2) return(Inf)
-  dpln_moment(2, fit) - dpln_mean(fit)^2
+  dpln_4p_moment(2, fit) - dpln_4p_mean(fit)^2
 }
 
-dpln_std <- function(fit) {
-  sqrt(dpln_var(fit))
+dpln_4p_std <- function(fit) {
+  sqrt(dpln_4p_var(fit))
 }
 
-dpln_skew <- function(fit) {
+dpln_4p_skew <- function(fit) {
   if (fit$alpha <= 3) return(NA)
-  m1 <- dpln_moment(1, fit)
-  m2 <- dpln_moment(2, fit)
-  m3 <- dpln_moment(3, fit)
+  m1 <- dpln_4p_moment(1, fit)
+  m2 <- dpln_4p_moment(2, fit)
+  m3 <- dpln_4p_moment(3, fit)
   sigma <- sqrt(m2 - m1^2)
   (m3 - 3*m1*m2 + 2*m1^3) / sigma^3
 }
 
-dpln_kurtosis <- function(fit) {
+dpln_4p_kurtosis <- function(fit) {
   if (fit$alpha <= 4) return(NA)
-  m1 <- dpln_moment(1, fit)
-  m2 <- dpln_moment(2, fit)
-  m3 <- dpln_moment(3, fit)
-  m4 <- dpln_moment(4, fit)
+  m1 <- dpln_4p_moment(1, fit)
+  m2 <- dpln_4p_moment(2, fit)
+  m3 <- dpln_4p_moment(3, fit)
+  m4 <- dpln_4p_moment(4, fit)
   sigma2 <- m2 - m1^2
   (m4 - 4*m1*m3 + 6*m1^2*m2 - 3*m1^4) / sigma2^2
 }
 
-dpln_median <- function(fit) {
-  dpln_quantile(0.5, fit)
+dpln_4p_median <- function(fit) {
+  dpln_4p_quantile(0.5, fit)
 }
 
 
 # -------------------------------
 # Interval / Entropy / Expect
 # -------------------------------
-dpln_interval <- function(level, fit) {
+dpln_4p_interval <- function(level, fit) {
   alpha_val <- (1 - level) / 2
-  dpln_quantile(c(alpha_val, 1 - alpha_val), fit)
+  dpln_4p_quantile(c(alpha_val, 1 - alpha_val), fit)
 }
 
-dpln_entropy <- function(fit) {
+dpln_4p_entropy <- function(fit) {
   integrand <- function(x) {
-    pdf_val <- dpln_pdf(x, fit)
+    pdf_val <- dpln_4p_pdf(x, fit)
     res <- numeric(length(x))
     pos <- !is.na(pdf_val) & pdf_val > 0
     res[pos] <- -pdf_val[pos] * log(pdf_val[pos])
     res
   }
-  lower <- dpln_quantile(1e-7, fit)
-  upper <- dpln_quantile(1 - 1e-7, fit)
+  lower <- dpln_4p_quantile(1e-7, fit)
+  upper <- dpln_4p_quantile(1 - 1e-7, fit)
   res <- integrate(integrand, lower = lower, upper = upper, rel.tol = 1e-6)
   res$value
 }
 
-dpln_expect <- function(func, fit, ...) {
+dpln_4p_expect <- function(func, fit, ...) {
   integrand <- function(x) {
-    func(x, ...) * dpln_pdf(x, fit)
+    func(x, ...) * dpln_4p_pdf(x, fit)
   }
-  lower <- dpln_quantile(1e-7, fit)
-  upper <- dpln_quantile(1 - 1e-7, fit)
+  lower <- dpln_4p_quantile(1e-7, fit)
+  upper <- dpln_4p_quantile(1 - 1e-7, fit)
   res <- integrate(integrand, lower = lower, upper = upper, rel.tol = 1e-6)
   res$value
 }
@@ -393,7 +393,7 @@ dpln_expect <- function(func, fit, ...) {
 # -------------------------------
 # S3: logLik (enables AIC/BIC)
 # -------------------------------
-logLik.dpln <- function(object, ...) {
+logLik.dpln_4p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 4,
@@ -402,7 +402,7 @@ logLik.dpln <- function(object, ...) {
   )
 }
 
-logLik.truncated_dpln <- function(object, ...) {
+logLik.truncated_dpln_4p <- function(object, ...) {
   structure(
     object$log_likelihood,
     df = 4,

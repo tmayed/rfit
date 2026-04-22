@@ -9,12 +9,12 @@ cat("=== Testing Mixture Distribution ===\n\n")
 n <- 1000
 cat(sprintf("Generating %d mixture samples (50%% lognormal, 50%% pareto)...\n", n))
 
-data_ln <- lognormal_rand(n/2, list(mu = 1, sigma = 0.5))
-data_pa <- pareto_rand(n/2, list(shape = 3, scale = 1))
+data_ln <- lognormal_2p_rand(n/2, list(mu = 1, sigma = 0.5))
+data_pa <- pareto_2p_rand(n/2, list(shape = 3, scale = 1))
 data <- c(data_ln, data_pa)
 
 # Fit mixture
-dist_names <- c("lognormal", "pareto")
+dist_names <- c("lognormal_2p", "pareto_2p")
 cat(sprintf("Fitting mixture of: %s...\n", paste(dist_names, collapse = ", ")))
 
 fit <- mixture_fit(data, dist_names)
