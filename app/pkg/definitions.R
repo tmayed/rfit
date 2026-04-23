@@ -228,5 +228,15 @@ filter_distributions <- function(np = NULL, lb = NULL, ub = NULL,
     names = c("lambda", "chi", "psi"),
     to_internal = function(p) c(p$lambda, log(p$chi), log(p$psi)),
     from_internal = function(v) list(lambda = v[1], chi = exp(v[2]), psi = exp(v[3]))
+  ),
+  gamma_2p = list(
+    np = 2,
+    domain = c(0, Inf),
+    f_0 = TRUE,
+    f_0_strict = FALSE, # Requires shape > 1
+    mean_def = TRUE,
+    names = c("shape", "scale"),
+    to_internal = function(p) c(log(p$shape), log(p$scale)),
+    from_internal = function(v) list(shape = exp(v[1]), scale = exp(v[2]))
   )
 )

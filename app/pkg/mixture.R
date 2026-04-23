@@ -18,7 +18,7 @@ if (!exists(".DIST_REGISTRY")) {
 # Mixture Fit
 # -------------------------------
 #' @param fixed_weights Optional numeric vector of weights (must sum to 1)
-mixture_fit <- function(data, dist_names, initial_fit = NULL, quiet = FALSE, ordered = TRUE, fixed_weights = NULL) {
+mixture_fit <- function(data, dist_names, initial_fit = NULL, quiet = FALSE, ordered = FALSE, fixed_weights = NULL) {
   data <- data[!is.na(data) & data > 0]
   K <- length(dist_names)
   

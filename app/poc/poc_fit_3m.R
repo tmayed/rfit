@@ -1,4 +1,4 @@
-# POC: Fit a hardcoded 2-component mixture to CSV data
+# POC: Fit a hardcoded 3-component mixture to CSV data
 
 # Initialize renv if it exists
 if (file.exists("../renv/activate.R")) {
@@ -12,8 +12,8 @@ source("../pkg/plots/pdf_plot.R")
 source("../pkg/plots/diag_plot.R")
 
 # 0. Define hardcoded mixture components
-dist_names <- c("lognormal_2p", "dpln_4p")
-cat(sprintf("Fitting mixture: %s + %s\n", dist_names[1], dist_names[2]))
+dist_names <- c("lognormal_2p", "gamma_2p", "dpln_4p")
+cat(sprintf("Fitting mixture: %s + %s + %s\n", dist_names[1], dist_names[2], dist_names[3]))
 
 # Prevent Rplots.pdf from being created
 if (!interactive()) {
@@ -30,7 +30,7 @@ if (!file.exists(input_file)) {
 }
 
 input_name <- tools::file_path_sans_ext(basename(input_file))
-output_dir <- file.path("outputs", paste0(input_name, "_fit_2m"))
+output_dir <- file.path("outputs", paste0(input_name, "_fit_3m"))
 
 # Create or empty the output directory
 if (dir.exists(output_dir)) {
@@ -51,10 +51,10 @@ if ("traffic" %in% colnames(raw_data)) {
 data <- data[!is.na(data) & data > 0]
 
 set.seed(42)
-subset_size <- min(10000, length(data))
+subset_size <- min(2000, length(data))
 data <- sample(data, subset_size)
 
-cat(sprintf("Loaded %d data points.\n", length(data)))
+cat(sprintf("Loaded %d data points, using subset of %d.\n", length(raw_data$traffic), length(data)))
 
 # 3. Fit the mixture
 fit <- mixture_fit(data, dist_names)
@@ -119,14 +119,15 @@ cat(sprintf("Empirical Mean:          %.4f\n", empirical_mean))
 # 7. Create Plots
 cat("\nGenerating plots...\n")
 
+mix_desc <- paste(dist_names, collapse = "+")
+
 plot_cdf_comparison(
   sample_data = data,
   fit = fit,
   dist_cdf = mixture_cdf,
   output_dir = output_dir,
   output_file = "cdf",
-  title = sprintf("2-Component Mixture Fit (Traffic Data: %s+%s)", 
-                  dist_names[1], dist_names[2]),
+  title = sprintf("3-Component Mixture Fit (Traffic Data: %s)", mix_desc),
   x_label = "Traffic",
 )
 
@@ -136,8 +137,7 @@ plot_cdf_comparison(
   dist_cdf = mixture_cdf,
   output_dir = output_dir,
   output_file = "cdf_log",
-  title = sprintf("2-Component Mixture Fit (Log Scale) (Traffic Data: %s+%s)", 
-                  dist_names[1], dist_names[2]),
+  title = sprintf("3-Component Mixture Fit (Log Scale) (Traffic Data: %s)", mix_desc),
   x_label = "Traffic",
   log_x = TRUE
 )
@@ -148,8 +148,7 @@ plot_pdf_comparison(
   dist_pdf = mixture_pdf,
   output_dir = output_dir,
   output_file = "pdf",
-  title = sprintf("2-Component Mixture PDF Fit (Traffic Data: %s+%s)", 
-                  dist_names[1], dist_names[2]),
+  title = sprintf("3-Component Mixture PDF Fit (Traffic Data: %s)", mix_desc),
   x_label = "Traffic",
   empirical_mean = empirical_mean,
   fitted_mean = mixture_theoretical_mean

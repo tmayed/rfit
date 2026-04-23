@@ -4,10 +4,11 @@
 #' @description Fits all combinations of 2-component mixtures of available distributions to the provided data 
 #'              and returns them ordered by quality of fit.
 #' @param data A numeric vector of positive data points.
+#' @param dist_names Optional character vector of distribution names to use for mixtures. If NULL, all registered distributions are used.
 #' @param criterion The criterion to use for ordering fits. Options are "AIC" (default) or "BIC".
 #' @return A list of mixture fit objects, ordered from best (lowest criterion) to worst.
 #' @export
-fit_all_2m <- function(data, criterion = c("AIC", "BIC")) {
+fit_all_2m <- function(data, dist_names = NULL, criterion = c("AIC", "BIC")) {
   criterion <- match.arg(criterion)
   
   # Ensure data is positive
@@ -16,8 +17,12 @@ fit_all_2m <- function(data, criterion = c("AIC", "BIC")) {
     stop("Need at least 10 valid positive data points for mixture fitting.")
   }
 
-  # List of distribution names available for mixtures (must be in .DIST_REGISTRY in definitions.R)
-  distributions <- names(.DIST_REGISTRY)
+  # List of distribution names available for mixtures
+  if (is.null(dist_names)) {
+    distributions <- names(.DIST_REGISTRY)
+  } else {
+    distributions <- dist_names
+  }
 
   # Generate all unique pairs with NO repeats (distinct distributions)
   # combn returns a matrix where each column is a combination

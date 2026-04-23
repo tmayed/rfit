@@ -20,6 +20,13 @@ poc_best_fit:
 poc_best_fit_2m:
 	(cd poc && Rscript poc_best_fit_2m.R)
 
+poc_best_fit_2m_custom:
+	(cd poc && Rscript poc_best_fit_2m_custom.R)
+
+poc_best_fit_3m_custom:
+	(cd poc && Rscript poc_best_fit_3m_custom.R)
+
+
 poc_filter_dist:
 	(cd poc && Rscript poc_filter_dist.R)
 
@@ -29,12 +36,15 @@ danish_fit:
 danish_2m:
 	(cd poc && Rscript danish_fit_2m.R)
 
-2m_random_mixture_fit:
-	(cd poc && Rscript 2m_random_mixture_fit.R)
-
 
 fit_2m:
 	(cd poc && Rscript fit_2m.R)
+
+poc_fit_3m:
+	(cd poc && Rscript poc_fit_3m.R)
+
+2m_random_mixture_fit:
+	(cd poc && Rscript 2m_random_mixture_fit.R)
 
 fit_2m_w:
 	(cd poc && Rscript fit_2m_w.R)

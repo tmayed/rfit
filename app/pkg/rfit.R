@@ -34,6 +34,7 @@ if (base_dir == "." || is.na(base_dir)) {
   source("dist/levy_2p.R")
   source("dist/nakagami_2p.R")
   source("dist/gig_3p.R")
+  source("dist/gamma_2p.R")
   source("definitions.R")
   source("fit.R")
   source("fit_2m.R")
@@ -63,6 +64,7 @@ if (base_dir == "." || is.na(base_dir)) {
   source(file.path(base_dir, "dist/levy_2p.R"))
   source(file.path(base_dir, "dist/nakagami_2p.R"))
   source(file.path(base_dir, "dist/gig_3p.R"))
+  source(file.path(base_dir, "dist/gamma_2p.R"))
   source(file.path(base_dir, "definitions.R"))
   source(file.path(base_dir, "fit.R"))
   source(file.path(base_dir, "fit_2m.R"))
@@ -189,6 +191,52 @@ gig_3p_interval <- gig_3p_interval
 gig_3p_entropy <- gig_3p_entropy
 #' @export
 gig_3p_expect <- gig_3p_expect
+
+# Gamma Exports
+#' @export
+gamma_2p_log_likelihood <- gamma_2p_log_likelihood
+#' @export
+gamma_2p_fit <- gamma_2p_fit
+#' @export
+gamma_2p_fit_truncated <- gamma_2p_fit_truncated
+#' @export
+gamma_2p_pdf <- gamma_2p_pdf
+#' @export
+gamma_2p_cdf <- gamma_2p_cdf
+#' @export
+gamma_2p_quantile <- gamma_2p_quantile
+#' @export
+gamma_2p_rand <- gamma_2p_rand
+#' @export
+gamma_2p_mean <- gamma_2p_mean
+#' @export
+gamma_2p_std <- gamma_2p_std
+#' @export
+gamma_2p_sf <- gamma_2p_sf
+#' @export
+gamma_2p_isf <- gamma_2p_isf
+#' @export
+gamma_2p_logpdf <- gamma_2p_logpdf
+#' @export
+gamma_2p_logcdf <- gamma_2p_logcdf
+#' @export
+gamma_2p_logsf <- gamma_2p_logsf
+#' @export
+gamma_2p_var <- gamma_2p_var
+#' @export
+gamma_2p_moment <- gamma_2p_moment
+#' @export
+gamma_2p_skew <- gamma_2p_skew
+#' @export
+gamma_2p_kurtosis <- gamma_2p_kurtosis
+#' @export
+gamma_2p_median <- gamma_2p_median
+#' @export
+gamma_2p_interval <- gamma_2p_interval
+#' @export
+gamma_2p_entropy <- gamma_2p_entropy
+#' @export
+gamma_2p_expect <- gamma_2p_expect
 
 # Nakagami Exports
 #' @export

@@ -3,10 +3,11 @@
 #' @title fit_all
 #' @description Fits all available distributions to the provided data and returns them ordered by quality of fit.
 #' @param data A numeric vector of positive data points.
+#' @param dist_names Optional character vector of distribution names to fit. If NULL, all registered distributions are used.
 #' @param criterion The criterion to use for ordering fits. Options are "AIC" (default) or "BIC".
 #' @return A list of fit objects, ordered from best (lowest criterion) to worst.
 #' @export
-fit_all <- function(data, criterion = c("AIC", "BIC")) {
+fit_all <- function(data, dist_names = NULL, criterion = c("AIC", "BIC")) {
   criterion <- match.arg(criterion)
   
   # Ensure data is positive for distributions that require it
@@ -15,8 +16,12 @@ fit_all <- function(data, criterion = c("AIC", "BIC")) {
     stop("Need at least 2 valid positive data points for fitting.")
   }
 
-  # List of distribution names available in the package (sourced from definitions.R)
-  distributions <- names(.DIST_REGISTRY)
+  # List of distribution names available in the package
+  if (is.null(dist_names)) {
+    distributions <- names(.DIST_REGISTRY)
+  } else {
+    distributions <- dist_names
+  }
 
   fits <- list()
     

@@ -5,8 +5,26 @@
 # -------------------------------
 weibull_2p_log_likelihood <- function(data, shape, scale) {
   data <- data[!is.na(data) & data > 0]
-  if (shape <= 0 || scale <= 0) return(-Inf)
-  sum(dweibull(data, shape = shape, scale = scale, log = TRUE))
+  if (!is.finite(shape) || !is.finite(scale) || shape <= 0 || scale <= 0) {
+    return(-Inf)
+  }
+
+  log_x <- log(data)
+  log_scale <- log(scale)
+  z <- shape * (log_x - log_scale)
+
+  # Reject parameter regions that would overflow exp(z) during likelihood
+  # evaluation rather than letting dweibull emit NaN warnings.
+  if (any(!is.finite(z)) || max(z) > log(.Machine$double.xmax)) {
+    return(-Inf)
+  }
+
+  ll <- length(data) * (log(shape) - shape * log_scale) +
+    (shape - 1) * sum(log_x) -
+    sum(exp(z))
+
+  if (!is.finite(ll)) return(-Inf)
+  ll
 }
 
 # -------------------------------
@@ -53,12 +71,15 @@ weibull_2p_fit <- function(data) {
 # Truncated Fit
 # -------------------------------
 weibull_2p_log_likelihood_truncated <- function(data, shape, scale, lower, upper) {
-  if (shape <= 0 || scale <= 0) return(-Inf)
+  if (!is.finite(shape) || !is.finite(scale) || shape <= 0 || scale <= 0) {
+    return(-Inf)
+  }
   
   data <- data[data >= lower & data <= upper]
   if (length(data) == 0) return(-Inf)
   
-  ll <- sum(dweibull(data, shape = shape, scale = scale, log = TRUE))
+  ll <- weibull_2p_log_likelihood(data, shape, scale)
+  if (!is.finite(ll)) return(-Inf)
   
   p_upper <- pweibull(upper, shape = shape, scale = scale)
   p_lower <- pweibull(lower, shape = shape, scale = scale)
