@@ -29,6 +29,9 @@ poc_best_fit_3m_custom:
 poc_fit_ln_gamma_dpnl:
 	(cd poc && Rscript poc_fit_ln_gamma_dpnl.R)
 
+poc_fit_ln_gamma:
+	(cd poc && Rscript poc_fit_ln_gamma.R)
+
 poc_filter_dist:
 	(cd poc && Rscript poc_filter_dist.R)
 

@@ -40,6 +40,7 @@ if (base_dir == "." || is.na(base_dir)) {
   source("fit_2m.R")
   source("fit_3m.R")
   source("fit_ln_gamma_dpnl.R")
+  source("fit_ln_gamma.R")
   source("mixture.R")
   source("mixture_fit_mean.R")
   source("segment_data.R")
@@ -72,6 +73,7 @@ if (base_dir == "." || is.na(base_dir)) {
   source(file.path(base_dir, "fit_2m.R"))
   source(file.path(base_dir, "fit_3m.R"))
   source(file.path(base_dir, "fit_ln_gamma_dpnl.R"))
+  source(file.path(base_dir, "fit_ln_gamma.R"))
   source(file.path(base_dir, "mixture.R"))
   source(file.path(base_dir, "mixture_fit_mean.R"))
   source(file.path(base_dir, "segment_data.R"))
@@ -87,6 +89,8 @@ mixture_fit <- mixture_fit
 mixture_fit_mean <- mixture_fit_mean
 #' @export
 fit_ln_gamma_dpnl <- fit_ln_gamma_dpnl
+#' @export
+fit_ln_gamma <- fit_ln_gamma
 #' @export
 mixture_pdf <- mixture_pdf
 #' @export
