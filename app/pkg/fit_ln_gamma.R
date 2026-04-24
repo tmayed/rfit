@@ -10,6 +10,8 @@
 #'   If NULL, the weights are fitted.
 #' @param n_starts Number of optimization starts. Defaults to 5.
 #' @param maxit Maximum optimizer iterations per start. Defaults to 3000.
+#' @param mean_fit Logical; if TRUE, constrains the theoretical mean to be 
+#'   within 0.01 of the empirical mean.
 #' @return A fitted mixture object of class `ln_gamma_mixture`.
 #' @details
 #' This implementation is fully self-contained. It uses a multi-start strategy
@@ -33,7 +35,8 @@ fit_ln_gamma <- function(data,
                           initial_gamma = NULL,
                           w = NULL,
                           n_starts = 5L,
-                          maxit = 3000L) {
+                          maxit = 3000L,
+                          mean_fit = FALSE) {
   # --- 1. Data Cleaning ---
   data <- data[is.finite(data) & !is.na(data) & data > 0]
   if (length(data) < 10L) {
@@ -49,6 +52,8 @@ fit_ln_gamma <- function(data,
     if (!is.numeric(w) || w <= 0 || w >= 1) stop("`w` must be a numeric value between 0 and 1.")
   }
   
+  emp_mean <- mean(data)
+
   # --- 2. Initializer Validation ---
   if (!is.null(initial_ln)) {
     if (!is.list(initial_ln) || is.null(initial_ln$mu) || is.null(initial_ln$sigma))
@@ -120,6 +125,8 @@ fit_ln_gamma <- function(data,
         fn = .fit_ln_gamma_neg_log_likelihood,
         data = data,
         w = w,
+        mean_fit = mean_fit,
+        emp_mean = emp_mean,
         method = "Nelder-Mead",
         control = list(maxit = maxit)
       ),
@@ -153,7 +160,9 @@ fit_ln_gamma <- function(data,
     distribution = "ln_gamma_mixture",
     convergence = best_fit$convergence,
     params_internal = best_fit$par,
-    fixed_w = w
+    fixed_w = w,
+    mean_fit = mean_fit,
+    empirical_mean = emp_mean
   )
 
   class(result) <- "ln_gamma_mixture"
@@ -192,7 +201,7 @@ logLik.ln_gamma_mixture <- function(object, ...) {
   )
 }
 
-.fit_ln_gamma_mixture_log_likelihood <- function(params, data, w = NULL, penalty = TRUE) {
+.fit_ln_gamma_mixture_log_likelihood <- function(params, data, w = NULL, mean_fit = FALSE, emp_mean = NULL, penalty = TRUE) {
   fit <- .fit_ln_gamma_unpack(params, w = w)
   
   log_ln <- dlnorm(data, meanlog = fit$lognormal$mu, sdlog = fit$lognormal$sigma, log = TRUE)
@@ -218,12 +227,26 @@ logLik.ln_gamma_mixture <- function(object, ...) {
   if (!is.finite(ll)) return(-1e20)
   
   if (penalty) {
-    # Regularization to keep parameters in sane regions
-    return(ll - 5e-4 * sum(params^2))
+    p_val <- 5e-4 * sum(params^2)
+    
+    if (mean_fit && !is.null(emp_mean)) {
+      # Theoretical mean of LN-Gamma mixture
+      theo_mean <- fit$weights[1] * exp(fit$lognormal$mu + fit$lognormal$sigma^2 / 2) +
+                   fit$weights[2] * (fit$gamma$shape * fit$gamma$scale)
+      
+      # Penalty if difference > 0.01
+      mean_diff <- abs(theo_mean - emp_mean)
+      if (mean_diff > 0.01) {
+        # Squared penalty for smooth optimization
+        p_val <- p_val + 1e4 * (mean_diff - 0.01)^2
+      }
+    }
+    
+    return(ll - p_val)
   }
   ll
 }
 
-.fit_ln_gamma_neg_log_likelihood <- function(params, data, w = NULL) {
-  - .fit_ln_gamma_mixture_log_likelihood(params, data, w = w, penalty = TRUE)
+.fit_ln_gamma_neg_log_likelihood <- function(params, data, w = NULL, mean_fit = FALSE, emp_mean = NULL) {
+  - .fit_ln_gamma_mixture_log_likelihood(params, data, w = w, mean_fit = mean_fit, emp_mean = emp_mean, penalty = TRUE)
 }
