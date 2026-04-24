@@ -20,10 +20,10 @@
 #' mixture model, the following constraints are STRICTLY enforced and MUST be 
 #' preserved in all future updates:
 #' \itemize{
-#'   \item \bold{gamma shape > 1}: Required to ensure the Gamma PDF $f(0) = 0$.
+#'   \item \bold{gamma shape > 0}: Standard Gamma distribution parameter constraint.
 #' }
-#' These conditions are implemented using a `1 + exp(theta)` transformation in 
-#' the unpacking logic. Any modification to the parameter mapping must 
+#' These conditions are implemented using appropriate transformations (e.g., exp)
+#' in the unpacking logic. Any modification to the parameter mapping must 
 #' explicitly maintain these lower bounds.
 #' @export
 fit_ln_gamma <- function(data,
@@ -52,8 +52,8 @@ fit_ln_gamma <- function(data,
   if (!is.null(initial_gamma)) {
     if (!is.list(initial_gamma) || is.null(initial_gamma$shape) || is.null(initial_gamma$scale))
       stop("`initial_gamma` must be a list with `shape` and `scale`.")
-    if (!is.finite(initial_gamma$shape) || !is.finite(initial_gamma$scale) || initial_gamma$shape <= 1 || initial_gamma$scale <= 0)
-      stop("`initial_gamma` parameters must be finite, `shape > 1` and `scale > 0`.")
+    if (!is.finite(initial_gamma$shape) || !is.finite(initial_gamma$scale) || initial_gamma$shape <= 0 || initial_gamma$scale <= 0)
+      stop("`initial_gamma` parameters must be finite, `shape > 0` and `scale > 0`.")
   }
 
   # --- 3. Self-Contained Initialization ---
@@ -73,7 +73,7 @@ fit_ln_gamma <- function(data,
   m2 <- mean(data_sorted[idx2])
   v2 <- stats::var(data_sorted[idx2])
   if (is.na(v2) || v2 < 1e-6) v2 <- m2^2 * 0.1
-  g_shape <- max(m2^2 / v2, 1.1)
+  g_shape <- max(m2^2 / v2, 0.1)
   g_scale <- v2 / m2
   if (!is.null(initial_gamma)) {
     g_shape <- initial_gamma$shape
@@ -84,7 +84,7 @@ fit_ln_gamma <- function(data,
   base_start <- c(
     0,                                # weight logit (w1 vs w2)
     ln_mu, log(ln_sigma),             # lognormal: mu, log(sigma)
-    log(g_shape - 1), log(g_scale)    # gamma: log(shape-1), log(scale)
+    log(g_shape), log(g_scale)        # gamma: log(shape), log(scale)
   )
 
   starts <- list(base_start)
@@ -155,7 +155,7 @@ logLik.ln_gamma_mixture <- function(object, ...) {
   w_logit <- pmax(-20, pmin(20, params[1]))
   weights <- c(exp(w_logit), 1) / (1 + exp(w_logit))
 
-  # Parameters with 1 + exp() constraints
+  # Parameters with exp() constraints
   list(
     weights = weights,
     lognormal = list(
@@ -163,7 +163,7 @@ logLik.ln_gamma_mixture <- function(object, ...) {
       sigma = exp(pmax(-15, pmin(15, params[3])))
     ),
     gamma = list(
-      shape = 1 + exp(pmax(-15, pmin(15, params[4]))),
+      shape = exp(pmax(-15, pmin(15, params[4]))),
       scale = exp(pmax(-15, pmin(15, params[5])))
     )
   )

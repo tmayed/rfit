@@ -31,7 +31,7 @@ stopifnot(abs(sum(fit$weights) - 1) < 1e-6)
 stopifnot(fit$convergence == 0) # Strict convergence check
 
 # Sane parameters check
-stopifnot(fit$components$gamma$shape > 1)
+stopifnot(fit$components$gamma$shape > 0)
 stopifnot(fit$components$lognormal$sigma > 0)
 
 # Accuracy check

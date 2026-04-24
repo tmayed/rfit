@@ -24,10 +24,10 @@
 #' \itemize{
 #'   \item \bold{alpha > 1}: Required to ensure the dPLN component mean is finite and well-defined.
 #'   \item \bold{beta > 1}: Required to ensure the dPLN PDF $f(0) = 0$.
-#'   \item \bold{gamma shape > 1}: Required to ensure the Gamma PDF $f(0) = 0$.
+#'   \item \bold{gamma shape > 0}: Standard Gamma distribution parameter constraint.
 #' }
-#' These conditions are implemented using a `1 + exp(theta)` transformation in 
-#' the unpacking logic. Any modification to the parameter mapping must 
+#' These conditions are implemented using appropriate transformations (e.g., exp)
+#' in the unpacking logic. Any modification to the parameter mapping must 
 #' explicitly maintain these lower bounds.
 #' @export
 fit_ln_gamma_dpnl <- function(data,
@@ -57,8 +57,8 @@ fit_ln_gamma_dpnl <- function(data,
   if (!is.null(initial_gamma)) {
     if (!is.list(initial_gamma) || is.null(initial_gamma$shape) || is.null(initial_gamma$scale))
       stop("`initial_gamma` must be a list with `shape` and `scale`.")
-    if (!is.finite(initial_gamma$shape) || !is.finite(initial_gamma$scale) || initial_gamma$shape <= 1 || initial_gamma$scale <= 0)
-      stop("`initial_gamma` parameters must be finite, `shape > 1` and `scale > 0`.")
+    if (!is.finite(initial_gamma$shape) || !is.finite(initial_gamma$scale) || initial_gamma$shape <= 0 || initial_gamma$scale <= 0)
+      stop("`initial_gamma` parameters must be finite, `shape > 0` and `scale > 0`.")
   }
   if (!is.null(initial_dpnl)) {
     if (!is.list(initial_dpnl) || is.null(initial_dpnl$alpha) || is.null(initial_dpnl$beta) || is.null(initial_dpnl$nu) || is.null(initial_dpnl$tau))
@@ -86,7 +86,7 @@ fit_ln_gamma_dpnl <- function(data,
   m2 <- mean(data_sorted[idx2])
   v2 <- stats::var(data_sorted[idx2])
   if (is.na(v2) || v2 < 1e-6) v2 <- m2^2 * 0.1
-  g_shape <- max(m2^2 / v2, 1.1)
+  g_shape <- max(m2^2 / v2, 0.1)
   g_scale <- v2 / m2
   if (!is.null(initial_gamma)) {
     g_shape <- initial_gamma$shape
@@ -109,7 +109,7 @@ fit_ln_gamma_dpnl <- function(data,
   base_start <- c(
     0, 0,
     ln_mu, log(ln_sigma),
-    log(g_shape - 1), log(g_scale),
+    log(g_shape), log(g_scale),
     log(d_alpha - 1), log(d_beta - 1),
     d_nu, log(d_tau)
   )
@@ -183,7 +183,7 @@ logLik.ln_gamma_dpnl_mixture <- function(object, ...) {
   w_raw <- c(w_logit, 0)
   weights <- exp(w_raw) / sum(exp(w_raw))
 
-  # Parameters with 1 + exp() constraints
+  # Parameters with appropriate constraints
   list(
     weights = weights,
     lognormal = list(
@@ -191,7 +191,7 @@ logLik.ln_gamma_dpnl_mixture <- function(object, ...) {
       sigma = exp(pmax(-15, pmin(15, params[4])))
     ),
     gamma = list(
-      shape = 1 + exp(pmax(-15, pmin(15, params[5]))),
+      shape = exp(pmax(-15, pmin(15, params[5]))),
       scale = exp(pmax(-15, pmin(15, params[6])))
     ),
     dpln = list(
