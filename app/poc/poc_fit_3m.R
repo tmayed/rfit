@@ -21,7 +21,7 @@ if (!interactive()) {
 }
 
 # 1. Load data
-input_file <- "inputs/whole_dataset.csv"
+input_file <- "inputs/router_traffic_2026_03_30.csv"
 if (!file.exists(input_file)) {
   # Try without ../ if called from poc directory
   if (!file.exists(input_file)) {

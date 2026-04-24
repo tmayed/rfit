@@ -39,8 +39,10 @@ if (base_dir == "." || is.na(base_dir)) {
   source("fit.R")
   source("fit_2m.R")
   source("fit_3m.R")
+  source("fit_ln_gamma_dpnl.R")
   source("mixture.R")
   source("mixture_fit_mean.R")
+  source("segment_data.R")
   source("plots/cdf_plot.R")
   source("plots/pdf_plot.R")
   source("plots/diag_plot.R")
@@ -69,8 +71,10 @@ if (base_dir == "." || is.na(base_dir)) {
   source(file.path(base_dir, "fit.R"))
   source(file.path(base_dir, "fit_2m.R"))
   source(file.path(base_dir, "fit_3m.R"))
+  source(file.path(base_dir, "fit_ln_gamma_dpnl.R"))
   source(file.path(base_dir, "mixture.R"))
   source(file.path(base_dir, "mixture_fit_mean.R"))
+  source(file.path(base_dir, "segment_data.R"))
   source(file.path(base_dir, "plots/cdf_plot.R"))
   source(file.path(base_dir, "plots/pdf_plot.R"))
   source(file.path(base_dir, "plots/diag_plot.R"))
@@ -81,6 +85,8 @@ if (base_dir == "." || is.na(base_dir)) {
 mixture_fit <- mixture_fit
 #' @export
 mixture_fit_mean <- mixture_fit_mean
+#' @export
+fit_ln_gamma_dpnl <- fit_ln_gamma_dpnl
 #' @export
 mixture_pdf <- mixture_pdf
 #' @export
@@ -99,6 +105,10 @@ plot_cdf_comparison <- plot_cdf_comparison
 plot_pdf_comparison <- plot_pdf_comparison
 #' @export
 plot_diag <- plot_diag
+#' @export
+segment_data <- segment_data
+#' @export
+logLik.ln_gamma_dpnl_mixture <- logLik.ln_gamma_dpnl_mixture
 
 # Birnbaum-Saunders Exports
 #' @export

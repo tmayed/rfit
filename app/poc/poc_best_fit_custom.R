@@ -15,7 +15,7 @@ if (!interactive()) {
 }
 
 # 1. Load data
-input_file <- "inputs/whole_dataset.csv"
+input_file <- "inputs/router_traffic_2026_03_30.csv"
 if (!file.exists(input_file)) {
   stop(sprintf("Input file not found: %s", input_file))
 }
