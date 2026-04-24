@@ -84,7 +84,7 @@ cat(sprintf("Loaded %d observations from %s, using subset of %d\n",
 
 # 3. Fit the dedicated lognormal-gamma mixture
 cat("\nFitting lognormal-gamma mixture using fit_ln_gamma()...\n")
-best_fit <- fit_ln_gamma(sample_data)
+best_fit <- fit_ln_gamma(sample_data, w=0.25)
 best_name <- best_fit$distribution
 
 # 4. Display fit summary and collect results

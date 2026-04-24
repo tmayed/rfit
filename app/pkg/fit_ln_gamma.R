@@ -6,6 +6,8 @@
 #'   `mu` and `sigma`.
 #' @param initial_gamma Optional named list with gamma starting values
 #'   `shape` and `scale`.
+#' @param w Optional fixed weight for the lognormal component (0 < w < 1). 
+#'   If NULL, the weights are fitted.
 #' @param n_starts Number of optimization starts. Defaults to 5.
 #' @param maxit Maximum optimizer iterations per start. Defaults to 3000.
 #' @return A fitted mixture object of class `ln_gamma_mixture`.
@@ -29,6 +31,7 @@
 fit_ln_gamma <- function(data,
                           initial_ln = NULL,
                           initial_gamma = NULL,
+                          w = NULL,
                           n_starts = 5L,
                           maxit = 3000L) {
   # --- 1. Data Cleaning ---
@@ -41,6 +44,10 @@ fit_ln_gamma <- function(data,
   maxit <- as.integer(maxit[1])
   if (is.na(n_starts) || n_starts < 1L) stop("`n_starts` must be an integer >= 1.")
   if (is.na(maxit) || maxit < 1L) stop("`maxit` must be an integer >= 1.")
+
+  if (!is.null(w)) {
+    if (!is.numeric(w) || w <= 0 || w >= 1) stop("`w` must be a numeric value between 0 and 1.")
+  }
   
   # --- 2. Initializer Validation ---
   if (!is.null(initial_ln)) {
@@ -81,11 +88,18 @@ fit_ln_gamma <- function(data,
   }
 
   # --- 4. Optimization Setup ---
-  base_start <- c(
-    0,                                # weight logit (w1 vs w2)
-    ln_mu, log(ln_sigma),             # lognormal: mu, log(sigma)
-    log(g_shape), log(g_scale)        # gamma: log(shape), log(scale)
-  )
+  if (is.null(w)) {
+    base_start <- c(
+      0,                                # weight logit (w1 vs w2)
+      ln_mu, log(ln_sigma),             # lognormal: mu, log(sigma)
+      log(g_shape), log(g_scale)        # gamma: log(shape), log(scale)
+    )
+  } else {
+    base_start <- c(
+      ln_mu, log(ln_sigma),             # lognormal: mu, log(sigma)
+      log(g_shape), log(g_scale)        # gamma: log(shape), log(scale)
+    )
+  }
 
   starts <- list(base_start)
   if (n_starts > 1) {
@@ -105,6 +119,7 @@ fit_ln_gamma <- function(data,
         par = start,
         fn = .fit_ln_gamma_neg_log_likelihood,
         data = data,
+        w = w,
         method = "Nelder-Mead",
         control = list(maxit = maxit)
       ),
@@ -124,8 +139,8 @@ fit_ln_gamma <- function(data,
   }
 
   # --- 6. Result Assembly ---
-  final <- .fit_ln_gamma_unpack(best_fit$par)
-  log_lik <- .fit_ln_gamma_mixture_log_likelihood(best_fit$par, data, penalty = FALSE)
+  final <- .fit_ln_gamma_unpack(best_fit$par, w = w)
+  log_lik <- .fit_ln_gamma_mixture_log_likelihood(best_fit$par, data, w = w, penalty = FALSE)
 
   result <- list(
     weights = stats::setNames(final$weights, c("lognormal", "gamma")),
@@ -137,7 +152,8 @@ fit_ln_gamma <- function(data,
     n = length(data),
     distribution = "ln_gamma_mixture",
     convergence = best_fit$convergence,
-    params_internal = best_fit$par
+    params_internal = best_fit$par,
+    fixed_w = w
   )
 
   class(result) <- "ln_gamma_mixture"
@@ -146,31 +162,38 @@ fit_ln_gamma <- function(data,
 
 #' @export
 logLik.ln_gamma_mixture <- function(object, ...) {
-  # df: 1 (weight) + 2 (LN) + 2 (Gamma) = 5
-  structure(object$log_likelihood, df = 5, nobs = object$n, class = "logLik")
+  # df: (1 if w fitted else 0) + 2 (LN) + 2 (Gamma)
+  df <- if (is.null(object$fixed_w)) 5 else 4
+  structure(object$log_likelihood, df = df, nobs = object$n, class = "logLik")
 }
 
-.fit_ln_gamma_unpack <- function(params) {
-  # Logit weights
-  w_logit <- pmax(-20, pmin(20, params[1]))
-  weights <- c(exp(w_logit), 1) / (1 + exp(w_logit))
+.fit_ln_gamma_unpack <- function(params, w = NULL) {
+  if (is.null(w)) {
+    # Logit weights
+    w_logit <- pmax(-20, pmin(20, params[1]))
+    weights <- c(exp(w_logit), 1) / (1 + exp(w_logit))
+    p_start <- 2
+  } else {
+    weights <- c(w, 1 - w)
+    p_start <- 1
+  }
 
   # Parameters with exp() constraints
   list(
     weights = weights,
     lognormal = list(
-      mu = params[2],
-      sigma = exp(pmax(-15, pmin(15, params[3])))
+      mu = params[p_start],
+      sigma = exp(pmax(-15, pmin(15, params[p_start + 1])))
     ),
     gamma = list(
-      shape = exp(pmax(-15, pmin(15, params[4]))),
-      scale = exp(pmax(-15, pmin(15, params[5])))
+      shape = exp(pmax(-15, pmin(15, params[p_start + 2]))),
+      scale = exp(pmax(-15, pmin(15, params[p_start + 3])))
     )
   )
 }
 
-.fit_ln_gamma_mixture_log_likelihood <- function(params, data, penalty = TRUE) {
-  fit <- .fit_ln_gamma_unpack(params)
+.fit_ln_gamma_mixture_log_likelihood <- function(params, data, w = NULL, penalty = TRUE) {
+  fit <- .fit_ln_gamma_unpack(params, w = w)
   
   log_ln <- dlnorm(data, meanlog = fit$lognormal$mu, sdlog = fit$lognormal$sigma, log = TRUE)
   log_g  <- dgamma(data, shape = fit$gamma$shape, scale = fit$gamma$scale, log = TRUE)
@@ -201,6 +224,6 @@ logLik.ln_gamma_mixture <- function(object, ...) {
   ll
 }
 
-.fit_ln_gamma_neg_log_likelihood <- function(params, data) {
-  - .fit_ln_gamma_mixture_log_likelihood(params, data, penalty = TRUE)
+.fit_ln_gamma_neg_log_likelihood <- function(params, data, w = NULL) {
+  - .fit_ln_gamma_mixture_log_likelihood(params, data, w = w, penalty = TRUE)
 }
