@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export GITHUB_PROJECTS="/home/tom/GitHub"
+export GITHUB_PROJECTS="$HOME/github"
 export REPO="$GITHUB_PROJECTS/rfit"
 export APP="$REPO/app"
 export INFRA="$REPO/infra"
@@ -10,7 +10,7 @@ export IMAGE_NAME="rfit"
 SERVICE_NAME="rfit"
 
 SCRIPT_NAME="rfit"
-SCRIPT_PATH="/usr/local/bin/$SCRIPT_NAME"
+SCRIPT_PATH="$HOME/bin/$SCRIPT_NAME"
 
 ######################################################
 
