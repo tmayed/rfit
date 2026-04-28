@@ -1,5 +1,9 @@
 # POC: Fit the dedicated lognormal-gamma mixture to CSV data
 
+# Configuration
+date_str <- "2026_03_30"
+ln_weight <- 0.25
+
 # Initialize renv
 if (file.exists("../renv/activate.R")) {
   Sys.setenv(RENV_PROJECT = normalizePath(".."))
@@ -53,9 +57,9 @@ if (!interactive()) {
 }
 
 # 1. Load data
-input_file <- "inputs/router_traffic_2026_03_30.csv"
+input_file <- sprintf("inputs/router_traffic_%s.csv", date_str)
 if (!file.exists(input_file)) {
-  input_file <- "poc/inputs/router_traffic_2026_03_30.csv"
+  input_file <- sprintf("poc/inputs/router_traffic_%s.csv", date_str)
 }
 if (!file.exists(input_file)) {
   stop(sprintf("Input file not found: %s", input_file))
@@ -84,7 +88,7 @@ cat(sprintf("Loaded %d observations from %s, using subset of %d\n",
 
 # 3. Fit the dedicated lognormal-gamma mixture
 cat("\nFitting lognormal-gamma mixture using fit_ln_gamma()...\n")
-best_fit <- fit_ln_gamma(sample_data, w=0.25, mean_fit = TRUE)
+best_fit <- fit_ln_gamma(sample_data, w=ln_weight, mean_fit = TRUE)
 best_name <- best_fit$distribution
 
 # 4. Display fit summary and collect results

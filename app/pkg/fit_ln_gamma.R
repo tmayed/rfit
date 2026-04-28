@@ -234,11 +234,11 @@ logLik.ln_gamma_mixture <- function(object, ...) {
       theo_mean <- fit$weights[1] * exp(fit$lognormal$mu + fit$lognormal$sigma^2 / 2) +
                    fit$weights[2] * (fit$gamma$shape * fit$gamma$scale)
       
-      # Penalty if difference > 0.01
+      # Penalty if difference > 0.001
       mean_diff <- abs(theo_mean - emp_mean)
-      if (mean_diff > 0.01) {
+      if (mean_diff > 0.001) {
         # Squared penalty for smooth optimization
-        p_val <- p_val + 1e4 * (mean_diff - 0.01)^2
+        p_val <- p_val + 1e5 * (mean_diff - 0.001)^2
       }
     }
     
