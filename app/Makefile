@@ -32,6 +32,9 @@ poc_fit_ln_gamma_dpnl:
 poc_fit_ln_gamma:
 	(cd poc && Rscript poc_fit_ln_gamma.R)
 
+poc_fit_ln_gamma_multi:
+	(cd poc && Rscript poc_fit_ln_gamma_multi.R)
+
 poc_filter_dist:
 	(cd poc && Rscript poc_filter_dist.R)
 
