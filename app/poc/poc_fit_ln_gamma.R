@@ -99,12 +99,31 @@ cat(sprintf("AIC: %.4f\n", AIC(best_fit)))
 cat(sprintf("BIC: %.4f\n", BIC(best_fit)))
 cat(sprintf("Convergence: %d\n", best_fit$convergence))
 
+# Calculate Tracking Metrics for Pipeline Monitoring
+norm_loglik <- best_fit$log_likelihood / length(sample_data)
+
+# Calculate KS Statistic (Max distance between empirical and theoretical CDF)
+# We use a sorted version of the data for the empirical CDF comparison
+sorted_data <- sort(sample_data)
+theoretical_cdf <- fit_ln_gamma_cdf(sorted_data, best_fit)
+empirical_cdf <- seq_along(sorted_data) / length(sorted_data)
+ks_stat <- max(abs(theoretical_cdf - empirical_cdf))
+
+cat(sprintf("Normalized Log-Likelihood: %.6f\n", norm_loglik))
+cat(sprintf("KS Statistic: %.6f\n", ks_stat))
+
 fit_results_df <- data.frame(
   distribution = character(),
   param = character(),
   value = numeric(),
   stringsAsFactors = FALSE
 )
+
+# Add Tracking Metrics to output
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "metrics", param = "bic", value = BIC(best_fit)))
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "metrics", param = "norm_loglik", value = norm_loglik))
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "metrics", param = "ks_stat", value = ks_stat))
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "metrics", param = "sample_size", value = length(sample_data)))
 
 cat("\nComponents:\n")
 component_means <- numeric(2)
