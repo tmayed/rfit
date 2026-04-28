@@ -1,7 +1,8 @@
 # POC: Fit the dedicated lognormal-gamma mixture to multiple CSV data files
 
 # Configuration
-date_str_list <- c("2026_03_30") # Add more dates here as needed
+# Set to NULL to automatically detect all available dates in the inputs/ directory
+date_str_list <- NULL 
 ln_weight <- 0.25
 mean_fit <- TRUE
 
@@ -12,6 +13,31 @@ if (file.exists("../renv/activate.R")) {
 }
 
 source("../pkg/rfit.R")
+
+# Function to detect dates from filenames of the form router_traffic_yyyy_mm_dd.csv
+get_available_dates <- function() {
+  dirs <- c("inputs", "poc/inputs")
+  all_files <- unlist(lapply(dirs, function(d) {
+    if (dir.exists(d)) list.files(d, pattern = "^router_traffic_.*\\.csv$") else NULL
+  }))
+  
+  if (length(all_files) == 0) return(character(0))
+  
+  # Extract yyyy_mm_dd using regex
+  dates <- gsub("^router_traffic_(\\d{4}_\\d{2}_\\d{2})\\.csv$", "\\1", all_files)
+  
+  # Return sorted unique dates
+  return(sort(unique(dates)))
+}
+
+# Auto-detect if list is NULL
+if (is.null(date_str_list)) {
+  date_str_list <- get_available_dates()
+  if (length(date_str_list) == 0) {
+    stop("No data files found and date_str_list is NULL.")
+  }
+  cat(sprintf("Auto-detected %d dates: %s\n", length(date_str_list), paste(date_str_list, collapse = ", ")))
+}
 
 # Dedicated CDF for the fit_ln_gamma() result object.
 fit_ln_gamma_cdf <- function(x, fit) {
