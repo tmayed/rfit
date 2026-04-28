@@ -3,6 +3,7 @@
 # Configuration
 date_str <- "2026_03_30"
 ln_weight <- 0.25
+mean_fit <- FALSE
 
 # Initialize renv
 if (file.exists("../renv/activate.R")) {
@@ -88,7 +89,7 @@ cat(sprintf("Loaded %d observations from %s, using subset of %d\n",
 
 # 3. Fit the dedicated lognormal-gamma mixture
 cat("\nFitting lognormal-gamma mixture using fit_ln_gamma()...\n")
-best_fit <- fit_ln_gamma(sample_data, w=ln_weight, mean_fit = TRUE)
+best_fit <- fit_ln_gamma(sample_data, w=ln_weight, mean_fit = mean_fit)
 best_name <- best_fit$distribution
 
 # 4. Display fit summary and collect results
@@ -140,7 +141,13 @@ for (p in names(best_fit$components$lognormal)) {
 comp_mean_ln <- lognormal_2p_mean(best_fit$components$lognormal)
 component_means["lognormal"] <- comp_mean_ln
 cat(sprintf("  Component Mean: %.4f\n", comp_mean_ln))
+
+# Calculate Lognormal exponent term (mu + sigma^2/2)
+ln_exp_term <- best_fit$components$lognormal$mu + (best_fit$components$lognormal$sigma^2) / 2
+cat(sprintf("  Log-Mean (mu + sigma^2/2): %.4f\n", ln_exp_term))
+
 fit_results_df <- rbind(fit_results_df, data.frame(distribution = "lognormal", param = "component_mean", value = comp_mean_ln))
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "lognormal", param = "log_mean_term", value = ln_exp_term))
 
 # Gamma component
 cat("\nComponent 2 (gamma):\n")
@@ -153,7 +160,13 @@ for (p in names(best_fit$components$gamma)) {
 comp_mean_g <- gamma_2p_mean(best_fit$components$gamma)
 component_means["gamma"] <- comp_mean_g
 cat(sprintf("  Component Mean: %.4f\n", comp_mean_g))
+
+# Calculate Gamma exponent term ln(shape * scale)
+gamma_exp_term <- log(best_fit$components$gamma$shape * best_fit$components$gamma$scale)
+cat(sprintf("  Log-Mean ln(shape*scale): %.4f\n", gamma_exp_term))
+
 fit_results_df <- rbind(fit_results_df, data.frame(distribution = "gamma", param = "component_mean", value = comp_mean_g))
+fit_results_df <- rbind(fit_results_df, data.frame(distribution = "gamma", param = "log_mean_term", value = gamma_exp_term))
 
 # Mean comparison
 mixture_theoretical_mean <- sum(best_fit$weights * component_means)
