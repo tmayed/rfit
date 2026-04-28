@@ -76,7 +76,7 @@ for (date_str in date_str_list) {
 
   # 5. Collect results
   fit_results_df <- data.frame(
-    date_str = date_str,
+    date_str = character(),
     distribution = character(),
     param = character(),
     value = numeric(),
