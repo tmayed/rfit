@@ -5,6 +5,7 @@
 date_str_list <- NULL 
 ln_weight <- 0.25
 mean_fit <- TRUE
+sample_size <- 2000
 
 # Initialize renv
 if (file.exists("../renv/activate.R")) {
@@ -82,7 +83,7 @@ for (date_str in date_str_list) {
 
   # 2. Take a subset robustly
   set.seed(42)
-  subset_size <- min(2000, length(data_clean))
+  subset_size <- min(sample_size, length(data_clean))
   sample_data <- sample(data_clean, subset_size)
 
   cat(sprintf("Loaded %d observations, using subset of %d\n", 
